@@ -30,11 +30,11 @@ function GraphBoard(props) {
 	}
 	const handleRemoveNode = (id) => {
 		// Remove node with given id
-		const nodeIdx = nodes.findIndex((node) => node.id == id)
+		const nodeIdx = nodes.findIndex((node) => node.id === id)
 		if (nodeIdx > -1) {
 			const newNodes = [...nodes];
 			newNodes.splice(nodeIdx, 1);
-			const newEdges = edges.filter((edge) => edge.start != id || edge.end != id);
+			const newEdges = edges.filter((edge) => edge.start !== id || edge.end !== id);
 			setNodes(newNodes);
 			setEdges(newEdges);
 		}
@@ -50,9 +50,12 @@ function GraphBoard(props) {
 			setEdges(newEdges);
 		}
 	}
-
 	const handleClick = (event) => {
 		console.log("Svg clicked");
+		console.log(props);
+		if (mode == Mode.DRAWNODE) {
+			console.log(event);
+		}
 	}
 	const handleStartDrag = (event) => {
 		console.log(event)
@@ -64,34 +67,26 @@ function GraphBoard(props) {
 	const handleEndDrag = (event) => {
 		console.log("End drag");
 	}
-	const [handlers, setHandlers] = useState({
-		click: handleClick,
-		startDrag: handleStartDrag,
-		dragging: handleDragging,
-		endDrag: handleEndDrag
-	})
 
-	useEffect(() => {
-		console.log(mode)
+	useEffect(() => {	
 		if (mode != undefined) {
 
 			if (mode == Mode.MOVE || mode == Mode.DRAWEDGE) {
-				console.log("ahihi")
-				graph.current.removeEventListener('click', handlers.click);
-				graph.current.addEventListener('mousedown', handlers.startDrag);
-				graph.current.addEventListener('mousemove', handlers.dragging);
-				graph.current.addEventListener('mouseup', handlers.endDrag);
+				graph.current.onclick = undefined;
+				graph.current.onmousedown = handleStartDrag;
+				graph.current.onmousemove = handleDragging;
+				graph.current.onmouseup = handleEndDrag;
 			} else{
 				if ([Mode.DRAWNODE, Mode.REMOVEEDGE, Mode.REMOVENODE].includes(mode)) {
-					graph.current.addEventListener('click', handlers.click);
+					graph.current.onclick = handleClick;
 				} else if (mode == Mode.RESET) {
-					graph.current.removeEventListener('click', handlers.click);
+					graph.current.onclick = undefined;
 					setNodes([]);
 					setEdges([]);
 				}
-				graph.current.removeEventListener('mousedown', handlers.startDrag);
-				graph.current.removeEventListener('mousemove', handlers.dragging);
-				graph.current.removeEventListener('mouseup', handlers.endDrag);
+				graph.current.onmousedown = undefined;
+				graph.current.onmousemove = undefined;
+				graph.current.onmouseup = undefined;
 			}
 		}
 	}, [mode]);
