@@ -52,9 +52,9 @@ function GraphBoard(props) {
 	}
 	const handleClick = (event) => {
 		console.log("Svg clicked");
-		console.log(props);
 		if (mode == Mode.DRAWNODE) {
-			console.log(event);
+			console.log("DRAWNODE")
+			handleDrawNode(event.offsetX, event.offsetY);
 		}
 	}
 	const handleStartDrag = (event) => {
@@ -68,40 +68,51 @@ function GraphBoard(props) {
 		console.log("End drag");
 	}
 
-	useEffect(() => {	
-		if (mode != undefined) {
-
-			if (mode == Mode.MOVE || mode == Mode.DRAWEDGE) {
+	if (mode != undefined) {
+		if (mode == Mode.MOVE || mode == Mode.DRAWEDGE) {
+			graph.current.onclick = undefined;
+			graph.current.onmousedown = handleStartDrag;
+			graph.current.onmousemove = handleDragging;
+			graph.current.onmouseup = handleEndDrag;
+		} else{
+			if ([Mode.DRAWNODE, Mode.REMOVEEDGE, Mode.REMOVENODE].includes(mode)) {
+				graph.current.onclick = handleClick;
+			} else if (mode == Mode.RESET) {
 				graph.current.onclick = undefined;
-				graph.current.onmousedown = handleStartDrag;
-				graph.current.onmousemove = handleDragging;
-				graph.current.onmouseup = handleEndDrag;
-			} else{
-				if ([Mode.DRAWNODE, Mode.REMOVEEDGE, Mode.REMOVENODE].includes(mode)) {
-					graph.current.onclick = handleClick;
-				} else if (mode == Mode.RESET) {
-					graph.current.onclick = undefined;
-					setNodes([]);
-					setEdges([]);
-				}
-				graph.current.onmousedown = undefined;
-				graph.current.onmousemove = undefined;
-				graph.current.onmouseup = undefined;
 			}
+			graph.current.onmousedown = undefined;
+			graph.current.onmousemove = undefined;
+			graph.current.onmouseup = undefined;
 		}
-	}, [mode]);
+	}
+	useEffect(() => {
+		if (mode == Mode.RESET) {
+			setEdges([]);
+			setNodes([]);
+		}
+
+	}, [mode])
 	return (
-		<svg ref={graph}>
-			<g className="nodegroup">
-		      <circle
-		        //onMouseDown={() => console.log("Node mouse down")}
-		        className="draggable"
-		        cx={100}
-		        cy={100}
-		        r={50}
-		        id={3}
-		      ></circle>
-			</g>
+		<svg ref={graph} className="graph">
+			{nodes.map((e, idx) => {
+
+				return (
+					<g className="nodegroup">
+
+					<circle
+		        	//onMouseDown={() => console.log("Node mouse down")}
+			        className="draggable"
+			        cx={e.x}
+			        cy={e.y}
+			        r={Mode.NODE_RADIUS}
+			        id={e.id}
+			      	></circle>
+			      	<text x={e.x-4} y={e.y + 4}>{e.id}</text>
+					</g>
+
+			    )
+			})}
+
 		</svg>			
 	);
 }

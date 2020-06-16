@@ -7,6 +7,6 @@ export const Mode = {
 	REMOVEEDGE: 5,
 	DRAWEDGE: 6,
 	RESET: 7,
-	NODE_RADIUS: 50
+	NODE_RADIUS: 20
 
 };
