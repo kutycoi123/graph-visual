@@ -1,11 +1,12 @@
 
 export const Mode = {
 	RUN: 1,
-	DRAW: 2,
+	DRAWNODE: 2,
 	MOVE: 3,
 	REMOVENODE: 4,
 	REMOVEEDGE: 5,
-	RESET: 6,
+	DRAWEDGE: 6,
+	RESET: 7,
 	NODE_RADIUS: 50
 
 };

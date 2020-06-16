@@ -71,30 +71,28 @@ function GraphBoard(props) {
 		endDrag: handleEndDrag
 	})
 
-	switch (mode) {
-		case Mode.MOVE:
-			graph.current.removeEventListener('click', handlers.click);
-			graph.current.addEventListener('mousedown', handlers.startDrag);
-			graph.current.addEventListener('mousemove', handlers.dragging);
-			graph.current.addEventListener('mouseup', handlers.endDrag);
-			break;
-		case Mode.DRAW:
-			graph.current.addEventListener('click', handlers.click);
-		case Mode.RESET:
-		case Mode.REMOVENODE:
-		case Mode.REMOVEEDGE:
-			graph.current.removeEventListener('mousedown', handlers.startDrag);
-			graph.current.removeEventListener('mousemove', handlers.dragging);
-			graph.current.removeEventListener('mouseup', handlers.endDrag);
-			break;
-	}
-
 	useEffect(() => {
-		switch(mode) {
-			case Mode.RESET:
-				setNodes([]);
-				setEdges([]);
-				break;
+		console.log(mode)
+		if (mode != undefined) {
+
+			if (mode == Mode.MOVE || mode == Mode.DRAWEDGE) {
+				console.log("ahihi")
+				graph.current.removeEventListener('click', handlers.click);
+				graph.current.addEventListener('mousedown', handlers.startDrag);
+				graph.current.addEventListener('mousemove', handlers.dragging);
+				graph.current.addEventListener('mouseup', handlers.endDrag);
+			} else{
+				if ([Mode.DRAWNODE, Mode.REMOVEEDGE, Mode.REMOVENODE].includes(mode)) {
+					graph.current.addEventListener('click', handlers.click);
+				} else if (mode == Mode.RESET) {
+					graph.current.removeEventListener('click', handlers.click);
+					setNodes([]);
+					setEdges([]);
+				}
+				graph.current.removeEventListener('mousedown', handlers.startDrag);
+				graph.current.removeEventListener('mousemove', handlers.dragging);
+				graph.current.removeEventListener('mouseup', handlers.endDrag);
+			}
 		}
 	}, [mode]);
 	return (

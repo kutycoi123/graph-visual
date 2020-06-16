@@ -16,13 +16,6 @@ function Main() {
 
 	const [mode, setMode] = useState();
 	const handleChangeMode = (mode) => {
-		switch (mode) {
-			case Mode.RESET: 
-				setMode(mode);
-				break;
-			case Mode.RUN:
-				break;
-		}
 		setMode(mode);
 	}
 	
@@ -31,9 +24,10 @@ function Main() {
 		<div>
 			<div className="graph-mode">
 				<button onClick={() => handleChangeMode(Mode.RUN)}>Run algorithm</button>
-				<button onClick={() => handleChangeMode(Mode.DRAW)}>Draw node</button>
+				<button onClick={() => handleChangeMode(Mode.DRAWNODE)}>Draw node</button>
 				<button onClick={() => handleChangeMode(Mode.MOVE)}>Move node</button>
 				<button onClick={() => handleChangeMode(Mode.REMOVENODE)}>Remove node</button>
+				<button onClick={() => handleChangeMode(Mode.DRAWEDGE)}>Draw edge</button>
 				<button onClick={() => handleChangeMode(Mode.REMOVEEDGE)}>Remove edge</button>
 				<button onClick={() => handleChangeMode(Mode.RESET)}>Reset</button>
 			</div>
