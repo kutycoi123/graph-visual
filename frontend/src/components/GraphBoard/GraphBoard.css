@@ -10,3 +10,6 @@
 	stroke: black;
 	stroke-width: 2px;
 }
+.nodelabel{
+	pointer-events: none;
+}

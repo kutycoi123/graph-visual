@@ -28,6 +28,14 @@ function GraphBoard(props) {
 		}
 
 	}
+
+	const handleMoveNode = (newNode) => {
+		if (!isOverlapped(newNode.x, newNode.y)) {
+			newNode.id = nodes.length;
+			setNodes([...nodes, newNode]);
+		}
+	}
+
 	const handleRemoveNode = (id) => {
 		// Remove node with given id
 		const nodeIdx = nodes.findIndex((node) => node.id === id)
@@ -51,14 +59,13 @@ function GraphBoard(props) {
 		}
 	}
 	const handleClick = (event) => {
-		console.log("Svg clicked");
 		if (mode == Mode.DRAWNODE) {
-			console.log("DRAWNODE")
 			handleDrawNode(event.offsetX, event.offsetY);
+		} else if (mode == Mode.REMOVENODE) {
+			console.log(event);
 		}
 	}
 	const handleStartDrag = (event) => {
-		console.log(event)
 		console.log("Start drag");
 	} 
 	const handleDragging = (event) => {
@@ -107,7 +114,7 @@ function GraphBoard(props) {
 			        r={Mode.NODE_RADIUS}
 			        id={e.id}
 			      	></circle>
-			      	<text x={e.x-4} y={e.y + 4}>{e.id}</text>
+			      	<text className="nodelabel" x={e.x-4} y={e.y + 4}>{e.id}</text>
 					</g>
 
 			    )
