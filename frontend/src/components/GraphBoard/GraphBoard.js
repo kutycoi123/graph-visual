@@ -10,6 +10,7 @@ function GraphBoard(props) {
 	} = props;
 
 	const graph = useRef();
+	const clickedNode = useRef();
 	const isOverlapped = (x, y) => {
 		for (let node of nodes) {
 			if (Math.sqrt(Math.pow(x - node.x, 2) + Math.pow(y - node.y,2)) <= Mode.NODE_RADIUS) {
@@ -30,10 +31,14 @@ function GraphBoard(props) {
 
 	}
 
-	const handleMoveNode = (newNode) => {
-		if (!isOverlapped(newNode.x, newNode.y)) {
-			newNode.id = nodes.length;
-			setNodes([...nodes, newNode]);
+	const handleMoveNode = (id, x, y) => {
+		if (!isOverlapped(x, y)) {
+			const nodeIdx = nodes.findIndex((node) => node.id === id)
+			if (nodeIdx > -1){
+				const oldNode = nodes[nodeIdx];
+				const newNodes = [...nodes.slice(0, nodeIdx), {...oldNode, x: x, y: y}, ...nodes.slice(nodeIdx+1)]
+				setNodes(newNodes);
+			}
 		}
 	}
 
@@ -70,13 +75,24 @@ function GraphBoard(props) {
 		}
 	}
 	const handleStartDrag = (event) => {
-		console.log("Start drag");
+		const elem = event.target;
+		if (elem.classList.contains("draggable")) {
+			clickedNode.current = elem;
+		}
 	} 
 	const handleDragging = (event) => {
-		console.log("Dragging");
+		if (event.target.classList.contains("draggable") && clickedNode.current) {
+			let x = event.offsetX;
+			let y = event.offsetY;
+			clickedNode.current.setAttribute("cx", x);
+			clickedNode.current.setAttribute("cy", y);
+			clickedNode.current.nextElementSibling.setAttribute("x", x-4);
+			clickedNode.current.nextElementSibling.setAttribute("y", y+4);
+			handleMoveNode(parseInt(clickedNode.current.getAttribute('id')), x, y);
+		}
 	}
 	const handleEndDrag = (event) => {
-		console.log("End drag");
+		clickedNode.current = undefined;
 	}
 
 	if (mode !== undefined) {
