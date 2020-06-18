@@ -4,7 +4,7 @@ import './GraphBoard.css';
 function GraphBoard(props) {
 	const [nodes, setNodes] = useState([]);
 	const [edges, setEdges] = useState([]);
-
+	const [nodeCnt, setNodeCnt] = useState(0);
 	const {
 		mode
 	} = props;
@@ -23,8 +23,9 @@ function GraphBoard(props) {
 		// Make sure (x,y) does not overlap with any node
 		if (!isOverlapped(x, y)) {
 			// Add new node
-			const newNode = {id: nodes.length, x, y, color: 0, neighbors: []}
+			const newNode = {id: nodeCnt, x, y, color: 0, neighbors: []}
 			setNodes([...nodes, newNode])
+			setNodeCnt(nodeCnt+1)
 		}
 
 	}
@@ -51,7 +52,7 @@ function GraphBoard(props) {
 	}
 	const handleRemoveEdge = (id) => {
 		// Remove edge with given edge id
-		const edgeIdx = edges.findIndex((edge) => edge.id == id)
+		const edgeIdx = edges.findIndex((edge) => edge.id === id)
 		if (edgeIdx > -1) {
 			const newEdges = [...edges]
 			newEdges.splice(edgeIdx, 1);
@@ -59,10 +60,13 @@ function GraphBoard(props) {
 		}
 	}
 	const handleClick = (event) => {
-		if (mode == Mode.DRAWNODE) {
+		if (mode === Mode.DRAWNODE) {
 			handleDrawNode(event.offsetX, event.offsetY);
-		} else if (mode == Mode.REMOVENODE) {
-			console.log(event);
+		} else if (mode === Mode.REMOVENODE) {
+			let id = event.target.getAttribute('id')
+			if (id == 0 || id) {
+				handleRemoveNode(parseInt(id));
+			}
 		}
 	}
 	const handleStartDrag = (event) => {
@@ -75,8 +79,8 @@ function GraphBoard(props) {
 		console.log("End drag");
 	}
 
-	if (mode != undefined) {
-		if (mode == Mode.MOVE || mode == Mode.DRAWEDGE) {
+	if (mode !== undefined) {
+		if (mode === Mode.MOVE || mode === Mode.DRAWEDGE) {
 			graph.current.onclick = undefined;
 			graph.current.onmousedown = handleStartDrag;
 			graph.current.onmousemove = handleDragging;
@@ -84,7 +88,7 @@ function GraphBoard(props) {
 		} else{
 			if ([Mode.DRAWNODE, Mode.REMOVEEDGE, Mode.REMOVENODE].includes(mode)) {
 				graph.current.onclick = handleClick;
-			} else if (mode == Mode.RESET) {
+			} else if (mode === Mode.RESET) {
 				graph.current.onclick = undefined;
 			}
 			graph.current.onmousedown = undefined;
@@ -93,9 +97,10 @@ function GraphBoard(props) {
 		}
 	}
 	useEffect(() => {
-		if (mode == Mode.RESET) {
+		if (mode === Mode.RESET) {
 			setEdges([]);
 			setNodes([]);
+			setNodeCnt(0);
 		}
 
 	}, [mode])
@@ -108,7 +113,7 @@ function GraphBoard(props) {
 
 					<circle
 		        	//onMouseDown={() => console.log("Node mouse down")}
-			        className="draggable"
+			        className="draggable node"
 			        cx={e.x}
 			        cy={e.y}
 			        r={Mode.NODE_RADIUS}
