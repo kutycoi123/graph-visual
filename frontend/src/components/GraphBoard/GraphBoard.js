@@ -32,13 +32,12 @@ function GraphBoard(props) {
 	}
 
 	const handleMoveNode = (id, x, y) => {
-		if (!isOverlapped(x, y)) {
-			const nodeIdx = nodes.findIndex((node) => node.id === id)
-			if (nodeIdx > -1){
-				const oldNode = nodes[nodeIdx];
-				const newNodes = [...nodes.slice(0, nodeIdx), {...oldNode, x: x, y: y}, ...nodes.slice(nodeIdx+1)]
-				setNodes(newNodes);
-			}
+		const nodeIdx = nodes.findIndex((node) => node.id === id)
+		if (nodeIdx > -1){
+			const oldNode = nodes[nodeIdx];
+			const newNodes = [...nodes.slice(0, nodeIdx), {...oldNode, x: x, y: y}, ...nodes.slice(nodeIdx+1)]
+			console.log("Updating", x, y)
+			setNodes(newNodes);
 		}
 	}
 
@@ -88,6 +87,7 @@ function GraphBoard(props) {
 			clickedNode.current.setAttribute("cy", y);
 			clickedNode.current.nextElementSibling.setAttribute("x", x-4);
 			clickedNode.current.nextElementSibling.setAttribute("y", y+4);
+			console.log("Drag:", x, y)
 			handleMoveNode(parseInt(clickedNode.current.getAttribute('id')), x, y);
 		}
 	}
@@ -120,6 +120,7 @@ function GraphBoard(props) {
 		}
 
 	}, [mode])
+	console.log(nodes);
 	return (
 		<svg ref={graph} className="graph">
 			{nodes.map((e, idx) => {
