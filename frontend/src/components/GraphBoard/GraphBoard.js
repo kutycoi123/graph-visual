@@ -64,14 +64,19 @@ function GraphBoard(props) {
 		// Remove node with given id
 		const nodeIdx = nodes.findIndex((node) => node.id === id)
 		if (nodeIdx > -1) {
-			const newNodes = [...nodes];
+			let newNodes = [...nodes];
 			newNodes.splice(nodeIdx, 1);
-			const newEdges = edges.filter((edge) => edge.start !== id || edge.end !== id);
-			setNodes(newNodes);
+			newNodes = newNodes.map(e => {
+				e.neighbors = e.neighbors.filter(neighborId => neighborId !== id);
+				return e;
+			})
+			const newEdges = edges.filter((edge) => edge.from !== id && edge.to !== id);
 			setEdges(newEdges);
+			setNodes(newNodes);
+
+			console.log(newEdges);
+			console.log(newNodes);
 		}
-
-
 	}
 	const handleRemoveEdge = (id) => {
 		// Remove edge with given edge id
@@ -83,14 +88,15 @@ function GraphBoard(props) {
 		}
 	}
 	const handleClick = (event) => {
+		console.log(event);
 		if (mode === Mode.DRAWNODE) {
 			handleDrawNode(event.offsetX, event.offsetY);
-		} else if (mode === Mode.REMOVENODE) {
+		} else if (mode === Mode.REMOVENODE && event.target.classList.contains("node")) {
 			const id = parseInt(event.target.getAttribute('id'));
 			if (id == 0 || id) {
 				handleRemoveNode(id);
 			}
-		} else if (mode == Mode.DRAWEDGE) {
+		} else if (mode == Mode.DRAWEDGE && event.target.classList.contains("node")) {
 			const id = parseInt(event.target.getAttribute('id'));
 			if (id == 0 || id) {
 				if (pairNode.from == undefined) {
@@ -116,6 +122,18 @@ function GraphBoard(props) {
 					}, 300)
 				}
 			}
+		} else if (mode == Mode.REMOVEEDGE && event.target.classList.contains("edge")) {
+			const id = event.target.getAttribute('id').split(" ");
+			const fromId = parseInt(id[0])
+			const toId = parseInt(id[1]);
+			const newEdges = edges.filter(e => (e.from !== fromId || e.to !== toId) && (e.from !== toId || e.to !== fromId))
+			const fromNode = nodes.find(e => e.id === fromId);
+			const toNode = nodes.find(e => e.id === toId);
+			fromNode.neighbors = fromNode.neighbors.filter(id => id !== toId);
+			toNode.neighbors = toNode.neighbors.filter(id => id !== fromId);
+			const newNodes = [...nodes];
+			setEdges(newEdges);
+			setNodes(newNodes);
 		}
 	}
 	const handleStartDrag = (event) => {
@@ -196,7 +214,7 @@ function GraphBoard(props) {
 				return (<path 
 					d={`M${startPoint.x},${startPoint.y} L${intersectPoint.x},${intersectPoint.y}`}
 					className="edge"
-					id={`${fromNode.id}${toNode.id}`}
+					id={`${fromNode.id} ${toNode.id}`}
 				/>
 				)
 			})}
