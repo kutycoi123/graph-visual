@@ -6,8 +6,8 @@ function GraphBoard(props) {
 	const [edges, setEdges] = useState([]);
 	const [nodeCnt, setNodeCnt] = useState(0);
 	const [pairNode, setPairNode] = useState({
-		begin: undefined,
-		end: undefined
+		from: undefined,
+		to: undefined
 	});
 
 	const {
@@ -16,7 +16,15 @@ function GraphBoard(props) {
 
 	const graph = useRef();
 	const clickedNode = useRef();
-
+	const calculateAccurateCoords = (x1, y1, x2, y2) => {
+	  let dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+	  let ratio = (dist - Mode.NODE_RADIUS) / dist; 
+	  let dx = (x2 - x1) * ratio;
+	  let dy = (y2 - y1) * ratio;
+	  let intersectX = x1 + dx;
+	  let intersectY = y1 + dy;
+	  return { x: intersectX, y: intersectY };
+	};
 	const replaceNode = (id, newNode, nodes) => {
 		const idx = nodes.findIndex(e => e.id === id);
 		if (idx > -1) {
@@ -25,10 +33,6 @@ function GraphBoard(props) {
 			return newNodes;
 		}
 		return nodes;
-	}
-	const addEdge = (begin, end) => {
-
-
 	}
 	const isOverlapped = (x, y) => {
 		for (let node of nodes) {
@@ -89,22 +93,22 @@ function GraphBoard(props) {
 		} else if (mode == Mode.DRAWEDGE) {
 			const id = parseInt(event.target.getAttribute('id'));
 			if (id == 0 || id) {
-				if (pairNode.begin == undefined) {
+				if (pairNode.from == undefined) {
 					const newNodes = replaceNode(id, {color: "red"}, nodes)
-					setPairNode({...pairNode, begin: id});
+					setPairNode({...pairNode, from: id});
 					setNodes(newNodes);
-				} else if (pairNode.end == undefined) {
+				} else if (pairNode.to == undefined) {
 					const newNodes = replaceNode(id, {color: "green"}, nodes)
-					setPairNode({...pairNode, end: id});
+					setPairNode({...pairNode, to: id});
 					setNodes(newNodes);
 					setTimeout(() => {
-						const beginNode = nodes.find(e => e.id === pairNode.begin);
-						const endNode = nodes.find(e => e.id === id);
-						beginNode.color = endNode.color = "white";
-						beginNode.neighbors.push(endNode.id);
-						endNode.neighbors.push(beginNode.id);
-						const newEdges = [...edges, {begin: beginNode.id, end: endNode.id}, 
-										 {end: beginNode.id, begin: endNode.id}]
+						const fromNode = nodes.find(e => e.id === pairNode.from);
+						const toNode = nodes.find(e => e.id === id);
+						fromNode.color = toNode.color = "white";
+						fromNode.neighbors.push(toNode.id);
+						toNode.neighbors.push(fromNode.id);
+						const newEdges = [...edges, {from: fromNode.id, to: toNode.id}, 
+										 {to: fromNode.id, from: toNode.id}]
 						const newNodes = [...nodes];
 						setPairNode({});
 						setNodes(newNodes);
@@ -163,24 +167,38 @@ function GraphBoard(props) {
 	return (
 		<svg ref={graph} className="graph">
 			{nodes.map((e, idx) => {
+				let drawnEdges = {};
 
 				return (
 					<g className="nodegroup">
 
 					<circle
-		        	//onMouseDown={() => console.log("Node mouse down")}
-			        className="draggable node"
-			        style={{fill: e.color || "white"}}
-			        cx={e.x}
-			        cy={e.y}
-			        r={Mode.NODE_RADIUS}
-			        id={e.id}
-			      	></circle>
+			        	//onMouseDown={() => console.log("Node mouse down")}
+				        className="draggable node"
+				        style={{fill: e.color || "white"}}
+				        cx={e.x}
+				        cy={e.y}
+				        r={Mode.NODE_RADIUS}
+				        id={e.id}
+				      	>
+				      </circle>
 
 			      	<text className="nodelabel" x={e.x-4} y={e.y + 4}>{e.id}</text>
 					</g>
 
 			    )
+			})}
+			{edges.map((e, idx) => {
+				const fromNode = nodes.find(node => node.id == e.from);
+				const toNode = nodes.find(node => node.id == e.to);
+				const intersectPoint = calculateAccurateCoords(fromNode.x, fromNode.y, toNode.x, toNode.y);
+				const startPoint = calculateAccurateCoords(toNode.x, toNode.y, fromNode.x, fromNode.y);
+				return (<path 
+					d={`M${startPoint.x},${startPoint.y} L${intersectPoint.x},${intersectPoint.y}`}
+					className="edge"
+					id={`${fromNode.id}${toNode.id}`}
+				/>
+				)
 			})}
 
 		</svg>			
