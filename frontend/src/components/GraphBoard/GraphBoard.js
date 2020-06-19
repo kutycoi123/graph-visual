@@ -5,12 +5,31 @@ function GraphBoard(props) {
 	const [nodes, setNodes] = useState([]);
 	const [edges, setEdges] = useState([]);
 	const [nodeCnt, setNodeCnt] = useState(0);
+	const [pairNode, setPairNode] = useState({
+		begin: undefined,
+		end: undefined
+	});
+
 	const {
 		mode
 	} = props;
 
 	const graph = useRef();
 	const clickedNode = useRef();
+
+	const replaceNode = (id, newNode, nodes) => {
+		const idx = nodes.findIndex(e => e.id === id);
+		if (idx > -1) {
+			const newNodes = [...nodes];
+			newNodes[idx] = {...nodes[idx], ...newNode};
+			return newNodes;
+		}
+		return nodes;
+	}
+	const addEdge = (begin, end) => {
+
+
+	}
 	const isOverlapped = (x, y) => {
 		for (let node of nodes) {
 			if (Math.sqrt(Math.pow(x - node.x, 2) + Math.pow(y - node.y,2)) <= Mode.NODE_RADIUS) {
@@ -32,13 +51,9 @@ function GraphBoard(props) {
 	}
 
 	const handleMoveNode = (id, x, y) => {
-		const nodeIdx = nodes.findIndex((node) => node.id === id)
-		if (nodeIdx > -1){
-			const oldNode = nodes[nodeIdx];
-			const newNodes = [...nodes.slice(0, nodeIdx), {...oldNode, x: x, y: y}, ...nodes.slice(nodeIdx+1)]
-			console.log("Updating", x, y)
-			setNodes(newNodes);
-		}
+		let newNode = {id, x, y};
+		const newNodes = replaceNode(id, newNode, nodes);
+		setNodes(newNodes);
 	}
 
 	const handleRemoveNode = (id) => {
@@ -67,9 +82,35 @@ function GraphBoard(props) {
 		if (mode === Mode.DRAWNODE) {
 			handleDrawNode(event.offsetX, event.offsetY);
 		} else if (mode === Mode.REMOVENODE) {
-			let id = event.target.getAttribute('id')
+			const id = parseInt(event.target.getAttribute('id'));
 			if (id == 0 || id) {
-				handleRemoveNode(parseInt(id));
+				handleRemoveNode(id);
+			}
+		} else if (mode == Mode.DRAWEDGE) {
+			const id = parseInt(event.target.getAttribute('id'));
+			if (id == 0 || id) {
+				if (pairNode.begin == undefined) {
+					const newNodes = replaceNode(id, {color: "red"}, nodes)
+					setPairNode({...pairNode, begin: id});
+					setNodes(newNodes);
+				} else if (pairNode.end == undefined) {
+					const newNodes = replaceNode(id, {color: "green"}, nodes)
+					setPairNode({...pairNode, end: id});
+					setNodes(newNodes);
+					setTimeout(() => {
+						const beginNode = nodes.find(e => e.id === pairNode.begin);
+						const endNode = nodes.find(e => e.id === id);
+						beginNode.color = endNode.color = "white";
+						beginNode.neighbors.push(endNode.id);
+						endNode.neighbors.push(beginNode.id);
+						const newEdges = [...edges, {begin: beginNode.id, end: endNode.id}, 
+										 {end: beginNode.id, begin: endNode.id}]
+						const newNodes = [...nodes];
+						setPairNode({});
+						setNodes(newNodes);
+						setEdges(newEdges);
+					}, 300)
+				}
 			}
 		}
 	}
@@ -87,7 +128,6 @@ function GraphBoard(props) {
 			clickedNode.current.setAttribute("cy", y);
 			clickedNode.current.nextElementSibling.setAttribute("x", x-4);
 			clickedNode.current.nextElementSibling.setAttribute("y", y+4);
-			console.log("Drag:", x, y)
 			handleMoveNode(parseInt(clickedNode.current.getAttribute('id')), x, y);
 		}
 	}
@@ -96,13 +136,13 @@ function GraphBoard(props) {
 	}
 
 	if (mode !== undefined) {
-		if (mode === Mode.MOVE || mode === Mode.DRAWEDGE) {
+		if (mode === Mode.MOVE) {
 			graph.current.onclick = undefined;
 			graph.current.onmousedown = handleStartDrag;
 			graph.current.onmousemove = handleDragging;
 			graph.current.onmouseup = handleEndDrag;
 		} else{
-			if ([Mode.DRAWNODE, Mode.REMOVEEDGE, Mode.REMOVENODE].includes(mode)) {
+			if ([Mode.DRAWNODE, Mode.DRAWEDGE, Mode.REMOVEEDGE, Mode.REMOVENODE].includes(mode)) {
 				graph.current.onclick = handleClick;
 			} else if (mode === Mode.RESET) {
 				graph.current.onclick = undefined;
@@ -120,7 +160,6 @@ function GraphBoard(props) {
 		}
 
 	}, [mode])
-	console.log(nodes);
 	return (
 		<svg ref={graph} className="graph">
 			{nodes.map((e, idx) => {
@@ -131,11 +170,13 @@ function GraphBoard(props) {
 					<circle
 		        	//onMouseDown={() => console.log("Node mouse down")}
 			        className="draggable node"
+			        style={{fill: e.color || "white"}}
 			        cx={e.x}
 			        cy={e.y}
 			        r={Mode.NODE_RADIUS}
 			        id={e.id}
 			      	></circle>
+
 			      	<text className="nodelabel" x={e.x-4} y={e.y + 4}>{e.id}</text>
 					</g>
 
