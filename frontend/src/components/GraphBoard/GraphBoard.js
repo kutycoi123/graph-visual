@@ -1,6 +1,8 @@
 import React, {useState, useRef, useEffect} from 'react';
 import {Mode} from '../constants.js';
 import './GraphBoard.css';
+
+
 function GraphBoard(props) {
 	const [nodes, setNodes] = useState([]);
 	const [edges, setEdges] = useState([]);
@@ -11,9 +13,8 @@ function GraphBoard(props) {
 	});
 
 	const {
-		mode
+		mode, algo
 	} = props;
-
 	const graph = useRef();
 	const clickedNode = useRef();
 	const calculateAccurateCoords = (x1, y1, x2, y2) => {
@@ -73,9 +74,6 @@ function GraphBoard(props) {
 			const newEdges = edges.filter((edge) => edge.from !== id && edge.to !== id);
 			setEdges(newEdges);
 			setNodes(newNodes);
-
-			console.log(newEdges);
-			console.log(newNodes);
 		}
 	}
 	const handleRemoveEdge = (id) => {
@@ -88,7 +86,6 @@ function GraphBoard(props) {
 		}
 	}
 	const handleClick = (event) => {
-		console.log(event);
 		if (mode === Mode.DRAWNODE) {
 			handleDrawNode(event.offsetX, event.offsetY);
 		} else if (mode === Mode.REMOVENODE && event.target.classList.contains("node")) {
