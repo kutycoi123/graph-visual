@@ -24,7 +24,7 @@ function Main() {
 
 		<div>
 			<div className="graph-mode">
-				{/*<button onClick={() => handleChangeMode(Mode.RUN)}>Run algorithm</button>*/}
+				<button onClick={() => handleChangeMode(Mode.RUN)}>Run algorithm</button>
 				<select name="algo" id="algo-select" onChange={(e) => setAlgo(e.target.value)}>
 					<option value="bfs">BFS</option>
 					<option value="dfs">DFS</option>

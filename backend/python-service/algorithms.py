@@ -1,23 +1,23 @@
 class Algorithm:
     def __init__(self, name):
         self.name = name
+        
+class GraphNode:
+    def __init__(self, id, neighbors):
+        self.id = id
+        self.neighbors = neighbors
 
 class GraphAlgorithm(Algorithm):
-    def __init__(self, name, nodes, edges):
+    def __init__(self, name, nodes):
         super(name)
         self.nodes = nodes
-        self.edges = edges
-        
-    def getNeighbors(self, node):
-        neighbors = list(filter(lambda e: e['from']==node ,self.edges))
-        return neighbors
 
     def run(self):
         pass
     
 class BFS(GraphAlgorithm):
-    def __init__(self, nodes, edges, start, end):
-        super('bfs', nodes, edges)
+    def __init__(self, nodes,start, end):
+        super('bfs', nodes)
         self.start = start
         self.end = end
     def bfs(self):
@@ -30,16 +30,15 @@ class BFS(GraphAlgorithm):
             trace.append(cur)
             if cur == self.end:
                 break
-            neighbors = self.getNeighbors(cur)
-            unvisited = list(filter(lambda n: not visited[n] ,neighbors))
+            unvisited = list(filter(lambda n: not visited[n] ,cur.neighbors))
             queue = queue + unvisited
         return trace
     def run(self):
         self.bfs()
 
 class DFS(GraphAlgorithm):
-    def __init__(self, nodes, edges, start, end):
-        super('dfs', nodes, edges)
+    def __init__(self, nodes, start, end):
+        super('dfs', nodes)
         self.start = start
         self.end = end
     def dfs(self):
@@ -52,8 +51,7 @@ class DFS(GraphAlgorithm):
             trace.append(cur)
             if cur == self.end:
                 break
-            neighbors = self.getNeighbors(cur)
-            unvisited = list(filter(lambda n: not visited[n] ,neighbors))
+            unvisited = list(filter(lambda n: not visited[n] ,cur.neighbors))
             stack = stack + unvisited
         return trace
     def run(self):

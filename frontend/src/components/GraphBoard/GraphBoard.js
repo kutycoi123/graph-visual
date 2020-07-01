@@ -1,7 +1,9 @@
 import React, {useState, useRef, useEffect} from 'react';
 import {Mode} from '../constants.js';
+import axios from 'axios';
 import './GraphBoard.css';
 
+const URL = "http://localhost:5000";
 
 function GraphBoard(props) {
 	const [nodes, setNodes] = useState([]);
@@ -176,8 +178,23 @@ function GraphBoard(props) {
 			setEdges([]);
 			setNodes([]);
 			setNodeCnt(0);
+		} else if (mode === Mode.RUN) {
+			if (algo === 'bfs' || algo === 'dfs') {
+				axios({
+					url: `${URL}/algo`,
+					method: "post",
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					data: {
+						"nodes": nodes,
+						"edges": edges
+					}
+				}).then(res => {
+					console.log(res)
+				})
+			}
 		}
-
 	}, [mode])
 	return (
 		<svg ref={graph} className="graph">

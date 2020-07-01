@@ -1,5 +1,9 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
+import algorithms as algo
+
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/', methods=['GET'])
 def test():
@@ -8,7 +12,7 @@ def test():
 @app.route('/algo', methods=['POST'])
 def runAlgo():
     data = request.json
-    print(data, type(data))
+    print(data)
     return jsonify({})
     
 if __name__ == "__main__":
