@@ -1,58 +1,62 @@
 class Algorithm:
     def __init__(self, name):
         self.name = name
-        
-class GraphNode:
-    def __init__(self, id, neighbors):
-        self.id = id
-        self.neighbors = neighbors
 
 class GraphAlgorithm(Algorithm):
     def __init__(self, name, nodes):
-        super(name)
+        super().__init__(name)
         self.nodes = nodes
-
+        self.nodeDict = {}
+        for node in self.nodes:
+            self.nodeDict[node["id"]] = node
+        #self.edges = edges
+    def getNeighbors(self, nodeId):
+        return self.nodeDict.get(nodeId)["neighbors"]
     def run(self):
         pass
     
 class BFS(GraphAlgorithm):
-    def __init__(self, nodes,start, end):
-        super('bfs', nodes)
+    def __init__(self, nodes, start, end):
+        super().__init__('bfs',nodes)
         self.start = start
         self.end = end
     def bfs(self):
         trace = []
         visited = {}
-        queue = [self.start]
-        while not queue:
+        queue = [{"parent": None, "id": self.start["id"]}]
+        while queue:
             cur = queue.pop(0)
-            visited[cur] = True
-            trace.append(cur)
-            if cur == self.end:
+            if not visited.get(cur["id"]):
+                visited[cur["id"]] = True
+                trace.append(cur)
+            if self.end != None and cur == self.end._id:
                 break
-            unvisited = list(filter(lambda n: not visited[n] ,cur.neighbors))
+            unvisited = list(filter(lambda n: not visited.get(n), self.getNeighbors(cur["id"])))
+            unvisited = list(map(lambda n: {"parent":cur["id"], "id": n},unvisited))
             queue = queue + unvisited
         return trace
     def run(self):
-        self.bfs()
+        return self.bfs()
 
 class DFS(GraphAlgorithm):
     def __init__(self, nodes, start, end):
-        super('dfs', nodes)
+        super().__init__('dfs',nodes)
         self.start = start
         self.end = end
     def dfs(self):
         trace = []
-        visisted = {}
-        stack = [self.start]
-        while not stack:
+        visited = {}
+        queue = [{"parent": None, "id": self.start["id"]}]
+        while queue:
             cur = queue.pop()
-            visisted[cur] = True
-            trace.append(cur)
-            if cur == self.end:
+            if not visited.get(cur["id"]):
+                visited[cur["id"]] = True
+                trace.append(cur)
+            if self.end != None and cur == self.end._id:
                 break
-            unvisited = list(filter(lambda n: not visited[n] ,cur.neighbors))
-            stack = stack + unvisited
+            unvisited = list(filter(lambda n: not visited.get(n), self.getNeighbors(cur["id"])))
+            unvisited = list(map(lambda n: {"parent":cur["id"], "id": n},unvisited))
+            queue = queue + unvisited
         return trace
     def run(self):
-        self.dfs()
+        return self.dfs()
