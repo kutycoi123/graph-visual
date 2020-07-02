@@ -15,7 +15,7 @@ function GraphBoard(props) {
 	});
 
 	const {
-		mode, algo
+		mode, algo, handleChangeMode
 	} = props;
 	const graph = useRef();
 	const clickedNode = useRef();
@@ -28,14 +28,23 @@ function GraphBoard(props) {
 	  let intersectY = y1 + dy;
 	  return { x: intersectX, y: intersectY };
 	};
-	const replaceNode = (id, newNode, nodes) => {
+	const replaceNode = (id, newAttributes, nodes) => {
 		const idx = nodes.findIndex(e => e.id === id);
 		if (idx > -1) {
 			const newNodes = [...nodes];
-			newNodes[idx] = {...nodes[idx], ...newNode};
+			newNodes[idx] = {...nodes[idx], ...newAttributes};
 			return newNodes;
 		}
 		return nodes;
+	}
+	const replaceEdge = (from, to, newAttributes, edges) => {
+		const idx = edges.findIndex(e => e.from === from && e.to === to);
+		if (idx > -1) {
+			const newEdges = [...edges];
+			newEdges[idx] = {...edges[idx], ...newAttributes};
+			return newEdges;
+		}
+		return edges;
 	}
 	const isOverlapped = (x, y) => {
 		for (let node of nodes) {
@@ -181,19 +190,50 @@ function GraphBoard(props) {
 		} else if (mode === Mode.RUN) {
 			if (algo === 'bfs' || algo === 'dfs') {
 				axios({
-					url: `${URL}/algo`,
+					url: `${URL}/algo/${algo}`,
 					method: "post",
 					headers: {
 						'Content-Type': 'application/json'
 					},
 					data: {
 						"nodes": nodes,
-						"edges": edges
+						"edges": edges,
+						"startNode": nodes[0],
 					}
 				}).then(res => {
-					console.log(res)
+					let trace = res.data;
+					let i = 1;
+					let newNodes = nodes;
+					let newEdges = edges;
+					for (let node of trace) {
+						let colorEdge = setTimeout(() => {
+							newEdges = replaceEdge(node.parent, node.id, {color: "green"}, newEdges);
+							newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
+							console.log(newEdges);
+							setEdges(newEdges);
+							clearTimeout(colorEdge);
+						}, 500*i);
+						let colorNode = setTimeout(() => {
+							newNodes = replaceNode(node.id, {color: "red"}, newNodes);
+							setNodes(newNodes);
+							clearTimeout(colorNode);
+						}, 501*i)
+						i++;
+					}		
+					handleChangeMode(Mode.FINISH);
+				}).catch(e => {
+					handleChangeMode(Mode.FINISH);
 				})
 			}
+		} else if (mode == Mode.RESETCOLOR) {
+			let newNodes = nodes.map(e => {
+				return {...e, color: "white"};
+			});
+			let newEdges = edges.map(e => {
+				return {...e, color: "white"}
+			})
+			setNodes(newNodes);
+			setEdges(newEdges);
 		}
 	}, [mode])
 	return (
@@ -229,6 +269,7 @@ function GraphBoard(props) {
 					d={`M${startPoint.x},${startPoint.y} L${intersectPoint.x},${intersectPoint.y}`}
 					className="edge"
 					id={`${fromNode.id} ${toNode.id}`}
+					style={{stroke: e.color || "white"}}
 				/>
 				)
 			})}

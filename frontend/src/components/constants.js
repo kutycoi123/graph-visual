@@ -7,6 +7,8 @@ export const Mode = {
 	REMOVEEDGE: 5,
 	DRAWEDGE: 6,
 	RESET: 7,
+	FINISH: 8,
+	RESETCOLOR: 9,
 	NODE_RADIUS: 20
 
 };

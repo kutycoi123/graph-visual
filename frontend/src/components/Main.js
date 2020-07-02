@@ -35,11 +35,13 @@ function Main() {
 				<button onClick={() => handleChangeMode(Mode.DRAWEDGE)}>Draw edge</button>
 				<button onClick={() => handleChangeMode(Mode.REMOVEEDGE)}>Remove edge</button>
 				<button onClick={() => handleChangeMode(Mode.RESET)}>Reset</button>
+				<button onClick={() => handleChangeMode(Mode.RESETCOLOR)}>Reset color</button>
 			</div>
 			<div className="graph-board">
 				<GraphBoard 
 					mode={mode}
 					algo={algo}
+					handleChangeMode={handleChangeMode}
 				/>
 			</div>
 		</div>
