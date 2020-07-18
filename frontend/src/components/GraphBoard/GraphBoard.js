@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect} from 'react';
-import {Mode} from '../constants.js';
+import {Mode, COLOR_MAPPING} from '../constants.js';
 import axios from 'axios';
 import './GraphBoard.css';
 
@@ -13,6 +13,7 @@ function GraphBoard(props) {
 		from: undefined,
 		to: undefined
 	});
+	const [colorReset, setColorReset] = useState(true);
 
 	const {
 		mode, algo, handleChangeMode
@@ -28,6 +29,17 @@ function GraphBoard(props) {
 	  let intersectY = y1 + dy;
 	  return { x: intersectX, y: intersectY };
 	};
+	const resetColor = () => {
+		let newNodes = nodes.map(e => {
+			return {...e, color: "white"};
+		});
+		let newEdges = edges.map(e => {
+			return {...e, color: "white"}
+		})
+		setNodes(newNodes);
+		setEdges(newEdges);
+		setColorReset(true);
+	}
 	const replaceNode = (id, newAttributes, nodes) => {
 		const idx = nodes.findIndex(e => e.id === id);
 		if (idx > -1) {
@@ -188,7 +200,11 @@ function GraphBoard(props) {
 			setNodes([]);
 			setNodeCnt(0);
 		} else if (mode === Mode.RUN) {
-			if (algo === 'bfs' || algo === 'dfs') {
+			if (!colorReset) {
+				alert("Please reset the color to visualize the algorithm");
+
+			}
+			else if (algo === 'bfs' || algo === 'dfs') {
 				axios({
 					url: `${URL}/algo/${algo}`,
 					method: "post",
@@ -209,7 +225,6 @@ function GraphBoard(props) {
 						let colorEdge = setTimeout(() => {
 							newEdges = replaceEdge(node.parent, node.id, {color: "green"}, newEdges);
 							newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
-							console.log(newEdges);
 							setEdges(newEdges);
 							clearTimeout(colorEdge);
 						}, 500*i);
@@ -220,20 +235,46 @@ function GraphBoard(props) {
 						}, 501*i)
 						i++;
 					}		
-					handleChangeMode(Mode.FINISH);
+					setColorReset(false);
+					//handleChangeMode(Mode.FINISH);
 				}).catch(e => {
-					handleChangeMode(Mode.FINISH);
+					//handleChangeMode(Mode.FINISH);
+				})
+			} else if (algo == "coloring") {
+				let nodes_dict = {};
+				nodes.map(e => nodes_dict[e.id] = e.neighbors);
+				axios({
+					url: `${URL}/algo/${algo}`,
+					method: "post",
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					data: {
+						"nodes": nodes,
+						"edges": edges,
+					}
+				}).then(res => {
+					let colors = res.data
+					let coloredNodes = nodes.map(e => {
+						return {...e, color: COLOR_MAPPING[colors[e.id]]}
+					});
+					let i = 1;
+					let newNodes = nodes;
+					for (let node of coloredNodes) {
+						console.log(node);
+						let colorNodeHandler = setTimeout(() => {
+							newNodes = replaceNode(node.id, {color: node.color}, newNodes);
+							setNodes(newNodes);
+							clearTimeout(colorNodeHandler);
+						}, 500*i);
+						i++;
+					}
+					setColorReset(false);
 				})
 			}
+			handleChangeMode(Mode.FINISH);
 		} else if (mode == Mode.RESETCOLOR) {
-			let newNodes = nodes.map(e => {
-				return {...e, color: "white"};
-			});
-			let newEdges = edges.map(e => {
-				return {...e, color: "white"}
-			})
-			setNodes(newNodes);
-			setEdges(newEdges);
+			resetColor();
 		}
 	}, [mode])
 	return (

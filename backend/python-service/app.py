@@ -28,6 +28,18 @@ def runDfs():
     dfs = algo.DFS(nodes, startNode, None)
     trace = dfs.run()
     return jsonify(trace)
+
+@app.route('/algo/coloring', methods=['POST'])
+def runGraphColoring():
+    data = request.json
+    nodes = data["nodes"]
+    for nColors in range(1, len(nodes)+1):
+        graph = algo.GraphColoring(nodes=nodes, nColors=7);
+        sol = graph.backtrack_search()
+        if sol:
+            return jsonify(sol)
+    return jsonify({})
+
 if __name__ == "__main__":
     app.run(debug=True,port=5000)
 

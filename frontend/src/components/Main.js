@@ -28,6 +28,7 @@ function Main() {
 				<select name="algo" id="algo-select" onChange={(e) => setAlgo(e.target.value)}>
 					<option value="bfs">BFS</option>
 					<option value="dfs">DFS</option>
+					<option value="coloring">Graph coloring</option>
 				</select>
 				<button onClick={() => handleChangeMode(Mode.DRAWNODE)}>Draw node</button>
 				<button onClick={() => handleChangeMode(Mode.MOVE)}>Move node</button>
