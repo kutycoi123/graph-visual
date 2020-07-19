@@ -14,6 +14,10 @@
 
 .nodelabel{
 	pointer-events: none;
+	fill: black;
+	text-anchor: middle;
+	pointer-events: none;
+  	user-select: none;
 }
 .edge{
 	fill: transparent;

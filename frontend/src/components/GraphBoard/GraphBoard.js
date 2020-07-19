@@ -20,6 +20,7 @@ function GraphBoard(props) {
 	} = props;
 	const graph = useRef();
 	const clickedNode = useRef();
+
 	const calculateAccurateCoords = (x1, y1, x2, y2) => {
 	  let dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 	  let ratio = (dist - Mode.NODE_RADIUS) / dist; 
@@ -29,6 +30,7 @@ function GraphBoard(props) {
 	  let intersectY = y1 + dy;
 	  return { x: intersectX, y: intersectY };
 	};
+
 	const resetColor = () => {
 		let newNodes = nodes.map(e => {
 			return {...e, color: "white"};
@@ -86,7 +88,7 @@ function GraphBoard(props) {
 
 	const handleRemoveNode = (id) => {
 		// Remove node with given id
-		const nodeIdx = nodes.findIndex((node) => node.id === id)
+	const nodeIdx = nodes.findIndex((node) => node.id === id)
 		if (nodeIdx > -1) {
 			let newNodes = [...nodes];
 			newNodes.splice(nodeIdx, 1);
@@ -110,6 +112,7 @@ function GraphBoard(props) {
 	}
 	const handleClick = (event) => {
 		if (mode === Mode.DRAWNODE) {
+			console.log(event);
 			handleDrawNode(event.offsetX, event.offsetY);
 		} else if (mode === Mode.REMOVENODE && event.target.classList.contains("node")) {
 			const id = parseInt(event.target.getAttribute('id'));
@@ -236,9 +239,8 @@ function GraphBoard(props) {
 						i++;
 					}		
 					setColorReset(false);
-					//handleChangeMode(Mode.FINISH);
 				}).catch(e => {
-					//handleChangeMode(Mode.FINISH);
+
 				})
 			} else if (algo == "coloring") {
 				let nodes_dict = {};
@@ -261,7 +263,6 @@ function GraphBoard(props) {
 					let i = 1;
 					let newNodes = nodes;
 					for (let node of coloredNodes) {
-						console.log(node);
 						let colorNodeHandler = setTimeout(() => {
 							newNodes = replaceNode(node.id, {color: node.color}, newNodes);
 							setNodes(newNodes);
@@ -296,7 +297,7 @@ function GraphBoard(props) {
 				      	>
 				      </circle>
 
-			      	<text className="nodelabel" x={e.x-4} y={e.y + 4}>{e.id}</text>
+			      	<text className="nodelabel" x={e.x} y={e.y + 4}>{e.id}</text>
 					</g>
 
 			    )

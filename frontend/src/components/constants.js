@@ -26,3 +26,5 @@ export const COLOR_MAPPING = {
 	10: '#f72a2a',
 
 }
+export const nodes = []
+export const edges = []
