@@ -171,7 +171,7 @@ function GraphBoard(props) {
 			let y = event.offsetY;
 			clickedNode.current.setAttribute("cx", x);
 			clickedNode.current.setAttribute("cy", y);
-			clickedNode.current.nextElementSibling.setAttribute("x", x-4);
+			clickedNode.current.nextElementSibling.setAttribute("x", x);
 			clickedNode.current.nextElementSibling.setAttribute("y", y+4);
 			handleMoveNode(parseInt(clickedNode.current.getAttribute('id')), x, y);
 		}
@@ -205,19 +205,22 @@ function GraphBoard(props) {
 		} else if (mode === Mode.RUN) {
 			if (!colorReset) {
 				alert("Please reset the color to visualize the algorithm");
-
 			}
-			else if (algo === 'bfs' || algo === 'dfs') {
+			else if (nodes.length == 0) {
+				alert("Please add some nodes in order to run algorithms");
+			} else if (algo === 'bfs' || algo === 'dfs') {
 				axios({
-					url: `${URL}/algo/${algo}`,
+					url: `${URL}/api/go/${algo}`,
 					method: "post",
 					headers: {
 						'Content-Type': 'application/json'
 					},
 					data: {
-						"nodes": nodes,
+						"nodes": nodes.map(e => {
+							return {id: e.id, neighbors: e.neighbors};
+						}),
 						"edges": edges,
-						"startNode": nodes[0],
+						"startNode": {id: nodes[0].id, neighbors: nodes[0].neighbors}
 					}
 				}).then(res => {
 					let trace = res.data;
@@ -252,7 +255,9 @@ function GraphBoard(props) {
 						'Content-Type': 'application/json'
 					},
 					data: {
-						"nodes": nodes,
+						"nodes": nodes.map(e => {
+							return {id: e.id, neighbors: e.neighbors};
+						}),
 						"edges": edges,
 					}
 				}).then(res => {
@@ -297,7 +302,7 @@ function GraphBoard(props) {
 				      	>
 				      </circle>
 
-			      	<text className="nodelabel" x={e.x} y={e.y + 4}>{e.id}</text>
+			      	<text className="nodelabel" x={e.x} y={e.y+4}>{e.id}</text>
 					</g>
 
 			    )

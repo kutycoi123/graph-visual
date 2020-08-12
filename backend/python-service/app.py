@@ -42,22 +42,29 @@ def graphColoring_python():
         if sol:
             return jsonify(sol)
     return jsonify({})
-@app.route('/api/go/bfs', methods=['GET'])
+@app.route('/api/go/bfs', methods=['POST'])
 def bfs_go():
-    # data = request.json
-    # startNode = data["startNode"]
-    # nodes = data["nodes"]
-    # edges = data["edges"]   
+    data = request.json
+    startNode = data["startNode"]
+    nodes = data["nodes"]
+    edges = data["edges"]   
+    #print(data)
+    #return jsonify({})
+
+
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
     socket.connect("tcp://localhost:5555")
-
-    arg = 'message'
-    request = json.dumps({'string': arg}).encode('utf8')
-    socket.send(request)
-    response_bytes = socket.recv()
-    response = json.loads(response_bytes.decode('utf-8'))
-    return jsonify({"result":response})
+    reqData = {"graph": data, "algo": "bfs"}
+    #print(reqData)
+    req = json.dumps(reqData).encode('utf8')
+    socket.send(req)
+    #response_bytes = socket.recv()
+    res = socket.recv()
+    response = json.loads(res.decode('utf-8'))
+    print("Reponse:", response)
+    return jsonify(response)
+    # return jsonify({"result":response})
 
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0',port=5000)
