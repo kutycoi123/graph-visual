@@ -1,10 +1,12 @@
-ubuntu_mirror = 'https://mirror.its.sfu.ca/mirror/ubuntu/'
+ubuntu_mirror = 'http://mirror.its.sfu.ca/mirror/ubuntu/'
+# ubuntu_mirror = 'http://mirror.csclub.uwaterloo.ca/ubuntu/'
 ubuntu_release = 'bionic'
 ubuntu_version = '18.04'
 username = 'vagrant'
 user_home = '/home/' + username
-project_home = user_home + '/project/demos' # you may need to change the working directory to match your project
-
+project_home = user_home + '/project' # you may need to change the working directory to match your project
+python_service = project_home + '/backend/python-service'
+frontend = project_home + '/frontend'
 
 python3_packages = '/usr/local/lib/python3.6/dist-packages'
 ruby_gems = '/var/lib/gems/2.5.0/gems/'
@@ -21,11 +23,16 @@ template '/etc/apt/sources.list' do
 end
 execute 'apt-get update' do
   action :nothing
+  #action :run
 end
 execute 'apt-get upgrade' do
   command 'apt-get dist-upgrade -y'
   only_if 'apt list --upgradeable | grep -q upgradable'
 end
+execute 'apt-get install libzmq3-dev' do
+  input 'Y'
+end
+
 directory '/opt'
 directory '/opt/installers'
 
@@ -37,17 +44,41 @@ package ['build-essential', 'cmake']
 
 # Other core language tools you might want
 
-#package ['python3', 'python3-pip', 'python3-dev']  # Python
+package ['python3', 'python3-pip', 'python3-dev']  # Python
 #package ['ghc', 'libghc-random-dev', 'cabal-install']  # Haskell
-#package 'golang-go'  # Go
+package 'golang-go'  # Go
 #package 'erlang'  # Erlang
 #package 'ocaml-nox'  # OCaml
 #package ['rustc', 'cargo']  # Rust
-#package 'scala'  # Scala
+#package 'scala'  # Scala 2.11
 #package ['ruby', 'ruby-dev']  # Ruby
 #package ['openjdk-11-jdk', 'maven']  # Java
 #package ['php-cli', 'php-pear']  # PHP
 #package 'clang' # Clang C/C++ compiler
+
+
+
+# Scala 2.13
+# prerequisite: a Java runtime, openjdk-11-jdk or similar
+#scala_version = '2.13.3'
+#remote_file '/opt/installers/scala.deb' do
+#  # download URL for *.deb from https://scala-lang.org/download/
+#  source "https://downloads.lightbend.com/scala/#{scala_version}/scala-#{scala_version}.deb"
+#end
+#execute 'dpkg -i /opt/installers/scala.deb' do
+#  creates '/usr/bin/scala'
+#end
+
+# SBT
+#execute 'sbt apt key' do
+#  command 'curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add'
+#  not_if 'apt-key list | grep "2EE0 EA64"'
+#end
+#file '/etc/apt/sources.list.d/sbt.list' do
+#  content 'deb https://dl.bintray.com/sbt/debian /'
+#  notifies :run, 'execute[apt-get update]', :immediately
+#end
+#package 'sbt'
 
 
 # .NET Core
@@ -64,15 +95,20 @@ package ['build-essential', 'cmake']
 
 # NodeJS (more modern than Ubuntu nodejs package) and NPM
 
-#remote_file '/opt/installers/node-setup.sh' do
-#  source 'https://deb.nodesource.com/setup_14.x'
-#  mode '0755'
-#end
-#execute '/opt/installers/node-setup.sh' do
-#  creates '/etc/apt/sources.list.d/nodesource.list'
-#  notifies :run, 'execute[apt-get update]', :immediately
-#end
-#package ['nodejs']
+remote_file '/opt/installers/node-setup.sh' do
+ source 'https://deb.nodesource.com/setup_14.x'
+ mode '0755'
+end
+execute '/opt/installers/node-setup.sh' do
+ creates '/etc/apt/sources.list.d/nodesource.list'
+ notifies :run, 'execute[apt-get update]', :immediately
+end
+package ['nodejs']
+
+
+# SWIG
+
+#package 'swig'
 
 
 # RabbitMQ-related things
@@ -103,9 +139,9 @@ package ['build-essential', 'cmake']
 # C/C++ library and dev library
 #package ['libzmq5', 'libzmq5-dev']
 # Python pyzmq library
-#execute 'pip3 install pyzmq==19.0.1' do
-#  creates "#{python3_packages}/zmq/__init__.py"
-#end
+execute 'pip3 install pyzmq==19.0.1' do
+ creates "#{python3_packages}/zmq/__init__.py"
+end
 # Ruby ezmq library
 #execute 'gem install ezmq -v 0.4.12' do
 #  creates "#{ruby_gems}/ezmq-0.4.12/Gemfile"
@@ -118,14 +154,22 @@ package ['build-essential', 'cmake']
 #  creates project_home + '/node_modules/zeromq/package.json'
 #end
 # Go zmq4 library
-#execute 'go get github.com/pebbe/zmq4' do
-#  cwd project_home 
-#  user username
-#  environment 'HOME' => user_home
-#  creates user_home + '/go/pkg/linux_amd64/github.com/pebbe/zmq4.a'
-#end
+execute 'go get github.com/pebbe/zmq4' do
+ cwd project_home 
+ user username
+ environment 'HOME' => user_home
+ creates user_home + '/go/pkg/linux_amd64/github.com/pebbe/zmq4.a'
+end
 
+# Install frontend packages
+execute 'npm install' do 
+  cwd frontend
+end  
 
+# Install python packages for python-service
+execute 'pip3 install -r requirements.txt' do
+  cwd python_service  
+end  
 
 # GraalVM
 
