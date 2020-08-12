@@ -12,7 +12,7 @@ CORS(app)
 def test():
     return jsonify({"response": "Hello world"})
 
-@app.route('/algo/bfs', methods=['POST'])
+@app.route('/api/python/bfs', methods=['POST'])
 def bfs_python():
     data = request.json
     startNode = data["startNode"]
@@ -22,7 +22,7 @@ def bfs_python():
     trace = bfs.run()
     return jsonify(trace)
 
-@app.route('/algo/dfs', methods=['POST'])
+@app.route('/api/python/dfs', methods=['POST'])
 def dfs_python():
     data = request.json
     startNode = data["startNode"]
@@ -32,7 +32,7 @@ def dfs_python():
     trace = dfs.run()
     return jsonify(trace)
 
-@app.route('/algo/coloring', methods=['POST'])
+@app.route('/api/python/coloring', methods=['POST'])
 def graphColoring_python():
     data = request.json
     nodes = data["nodes"]
@@ -48,24 +48,31 @@ def bfs_go():
     startNode = data["startNode"]
     nodes = data["nodes"]
     edges = data["edges"]   
-    #print(data)
-    #return jsonify({})
-
-
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
     socket.connect("tcp://localhost:5555")
     reqData = {"graph": data, "algo": "bfs"}
-    #print(reqData)
     req = json.dumps(reqData).encode('utf8')
     socket.send(req)
-    #response_bytes = socket.recv()
     res = socket.recv()
     response = json.loads(res.decode('utf-8'))
-    print("Reponse:", response)
     return jsonify(response)
-    # return jsonify({"result":response})
 
+@app.route('/api/go/dfs', methods=['POST'])
+def dfs_go():
+    data = request.json
+    startNode = data["startNode"]
+    nodes = data["nodes"]
+    edges = data["edges"]   
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5555")
+    reqData = {"graph": data, "algo": "dfs"}
+    req = json.dumps(reqData).encode('utf8')
+    socket.send(req)
+    res = socket.recv()
+    response = json.loads(res.decode('utf-8'))
+    return jsonify(response)    
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0',port=5000)
 

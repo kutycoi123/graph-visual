@@ -16,6 +16,7 @@ function Main() {
 
 	const [mode, setMode] = useState();
 	const [algo, setAlgo] = useState("bfs");
+	const [service, setService] = useState("python");
 	const handleChangeMode = (mode) => {
 		setMode(mode);
 	}
@@ -30,6 +31,10 @@ function Main() {
 					<option value="dfs">DFS</option>
 					<option value="coloring">Graph coloring</option>
 				</select>
+				<select name="service" id="service-select" onChange={(e) => setService(e.target.value)}>
+					<option value="python">Python</option>
+					<option value="go">Golang</option>
+				</select>				
 				<button onClick={() => handleChangeMode(Mode.DRAWNODE)}>Draw node</button>
 				<button onClick={() => handleChangeMode(Mode.MOVE)}>Move node</button>
 				<button onClick={() => handleChangeMode(Mode.REMOVENODE)}>Remove node</button>
@@ -42,6 +47,7 @@ function Main() {
 				<GraphBoard 
 					mode={mode}
 					algo={algo}
+					service={service}
 					handleChangeMode={handleChangeMode}
 				/>
 			</div>

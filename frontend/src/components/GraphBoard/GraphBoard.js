@@ -1,13 +1,14 @@
 import React, {useState, useRef, useEffect} from 'react';
-import {Mode, COLOR_MAPPING} from '../constants.js';
+import {Mode, COLOR_MAPPING, CREATE_UNDIRECTIONAL_GRAPH} from '../constants.js';
 import axios from 'axios';
 import './GraphBoard.css';
 
 const URL = "http://localhost:5000";
 
 function GraphBoard(props) {
-	const [nodes, setNodes] = useState([]);
-	const [edges, setEdges] = useState([]);
+	let random_graph = CREATE_UNDIRECTIONAL_GRAPH(12);
+	const [nodes, setNodes] = useState(random_graph.nodes);
+	const [edges, setEdges] = useState(random_graph.edges);
 	const [nodeCnt, setNodeCnt] = useState(0);
 	const [pairNode, setPairNode] = useState({
 		from: undefined,
@@ -16,7 +17,7 @@ function GraphBoard(props) {
 	const [colorReset, setColorReset] = useState(true);
 
 	const {
-		mode, algo, handleChangeMode
+		mode, algo, service, handleChangeMode
 	} = props;
 	const graph = useRef();
 	const clickedNode = useRef();
@@ -210,7 +211,7 @@ function GraphBoard(props) {
 				alert("Please add some nodes in order to run algorithms");
 			} else if (algo === 'bfs' || algo === 'dfs') {
 				axios({
-					url: `${URL}/api/go/${algo}`,
+					url: `${URL}/api/${service}/${algo}`,
 					method: "post",
 					headers: {
 						'Content-Type': 'application/json'
@@ -249,7 +250,7 @@ function GraphBoard(props) {
 				let nodes_dict = {};
 				nodes.map(e => nodes_dict[e.id] = e.neighbors);
 				axios({
-					url: `${URL}/algo/${algo}`,
+					url: `${URL}/api/${service}/${algo}`,
 					method: "post",
 					headers: {
 						'Content-Type': 'application/json'
