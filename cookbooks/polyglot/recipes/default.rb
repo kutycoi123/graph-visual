@@ -6,6 +6,7 @@ username = 'vagrant'
 user_home = '/home/' + username
 project_home = user_home + '/project' # you may need to change the working directory to match your project
 python_service = project_home + '/backend/python-service'
+go_service = project_home + '/backend/go-service'
 frontend = project_home + '/frontend'
 
 python3_packages = '/usr/local/lib/python3.6/dist-packages'
@@ -155,7 +156,7 @@ end
 #end
 # Go zmq4 library
 execute 'go get github.com/pebbe/zmq4' do
- cwd project_home 
+ cwd go_service 
  user username
  environment 'HOME' => user_home
  creates user_home + '/go/pkg/linux_amd64/github.com/pebbe/zmq4.a'

@@ -1,6 +1,9 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import algorithms as algo
+import json
+import zmq
+
 
 app = Flask(__name__)
 CORS(app)
@@ -10,7 +13,7 @@ def test():
     return jsonify({"response": "Hello world"})
 
 @app.route('/algo/bfs', methods=['POST'])
-def runBfs():
+def bfs_python():
     data = request.json
     startNode = data["startNode"]
     nodes = data["nodes"]
@@ -20,7 +23,7 @@ def runBfs():
     return jsonify(trace)
 
 @app.route('/algo/dfs', methods=['POST'])
-def runDfs():
+def dfs_python():
     data = request.json
     startNode = data["startNode"]
     nodes = data["nodes"]
@@ -30,7 +33,7 @@ def runDfs():
     return jsonify(trace)
 
 @app.route('/algo/coloring', methods=['POST'])
-def runGraphColoring():
+def graphColoring_python():
     data = request.json
     nodes = data["nodes"]
     for nColors in range(1, len(nodes)+1):
@@ -39,6 +42,22 @@ def runGraphColoring():
         if sol:
             return jsonify(sol)
     return jsonify({})
+@app.route('/api/go/bfs', methods=['GET'])
+def bfs_go():
+    # data = request.json
+    # startNode = data["startNode"]
+    # nodes = data["nodes"]
+    # edges = data["edges"]   
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5555")
+
+    arg = 'message'
+    request = json.dumps({'string': arg}).encode('utf8')
+    socket.send(request)
+    response_bytes = socket.recv()
+    response = json.loads(response_bytes.decode('utf-8'))
+    return jsonify({"result":response})
 
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0',port=5000)
