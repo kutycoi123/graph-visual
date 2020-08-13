@@ -38,7 +38,7 @@ function get_edges(nodes) {
 	let edges = [];
 	for (let node of nodes) {
 		let neighbors_edges = node.neighbors.map(id => {
-			return {from: node.id, to: id};
+			return {from: node.id, to: id, weight: 0, id: `${node.id} ${id}`};
 		})
 		edges = edges.concat(neighbors_edges);
 	}
@@ -50,6 +50,7 @@ function create_node(id, nodes) {
 		x = Math.floor(Math.random() * 1000 + 30);
 		y = Math.floor(Math.random() * 700 + 20);
 	}while(isOverlapped(x, y, nodes));
+	
 	return {x, y, id, neighbors: []};
 }
 
@@ -58,17 +59,17 @@ export function CREATE_UNDIRECTIONAL_GRAPH(nNodes) {
 	for (let i = 0; i < nNodes; ++i) {
 		nodes.push(create_node(i, nodes));
 	}
-	for (let i = 0; i < nNodes; ++i)  {
-		let node = nodes[i];
-		let nNeighbors = Math.floor(Math.random() * parseInt(nNodes / 2));		
-		for (let j = i+1; j < nNodes && node.neighbors.length < nNeighbors; ++j){
+	let maxNeighbors = parseInt(nNodes / 2);
+	for (let i = 0; i < nodes.length; ++i)  {
+		let fromNode = nodes[i];
+		for (let j = 0; j < nodes.length && fromNode.neighbors.length < maxNeighbors; ++j) {
+			let toNode = nodes[j];
 			let is_neighbor = Math.round(Math.random() * 1);
 			if (is_neighbor) {
-				node.neighbors.push(nodes[j].id);
-				nodes[j].neighbors.push(node.id);
+				fromNode.neighbors.push(toNode.id);
 			}
 		}
-	}
+	}	
 	let edges = get_edges(nodes);
 	return {nodes, edges};
 }

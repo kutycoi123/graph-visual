@@ -152,9 +152,8 @@ function GraphBoard(props) {
 						const toNode = nodes.find(e => e.id === id);
 						fromNode.color = toNode.color = "white";
 						fromNode.neighbors.push(toNode.id);
-						toNode.neighbors.push(fromNode.id);
-						const newEdges = [...edges, {from: fromNode.id, to: toNode.id}, 
-										 {to: fromNode.id, from: toNode.id}]
+						//toNode.neighbors.push(fromNode.id);
+						const newEdges = [...edges, {from: fromNode.id, to: toNode.id, weight: 0, id: `${fromNode.i} ${toNode.id}`}]
 						const newNodes = [...nodes];
 						setPairNode({});
 						setNodes(newNodes);
@@ -330,7 +329,6 @@ function GraphBoard(props) {
 				const intersectPoint1 = calculateAccurateCoords(fromNode.x, fromNode.y, toNode.x, toNode.y);
 				const intersectPoint2 = calculateAccurateCoords(toNode.x, toNode.y, fromNode.x, fromNode.y);
 				const midpoint = calculateCurve(intersectPoint2.x, intersectPoint2.y, intersectPoint1.x, intersectPoint1.y);
-				const startPoint = calculateAccurateCoords(toNode.x, toNode.y, fromNode.x, fromNode.y);
 				return (
 					<g>
 					<marker
@@ -345,19 +343,25 @@ function GraphBoard(props) {
                     	<polygon points="0 0, 10 3.5, 0 7" />
                   	</marker>
 					<path 
-						d={`M${intersectPoint1.x} ${intersectPoint1.y} Q${midpoint.x} ${midpoint.y} ${intersectPoint2.x} ${intersectPoint2.y}`}
-						//d={curve}
+						d={`M${intersectPoint2.x} ${intersectPoint2.y} Q${midpoint.x} ${midpoint.y} ${intersectPoint1.x} ${intersectPoint1.y}`}
 						className="edge"
-						id={`${fromNode.id} ${toNode.id}`}
+						id={e.id}
 						style={{stroke: e.color || "white"}}
 						markerEnd={`url(#arrowhead${e.from}${e.to})`}
+						onClick={() => {
+							let weight = prompt(`Please set a weight for edge from node ${e.from} to node {e.to}`);
+							let newEdges = [...edges];
+							let edge = newEdges.find(edge => e.id == edge.id);
+							edge.weight = weight;
+							setEdges(newEdges);
+						}}
 					/>
 					<text
                       className="edge-weight"
                       x={Math.atan2(fromNode.y-toNode.y, fromNode.x-toNode.x) < 0 ? midpoint.x : midpoint.x }
                       y={Math.atan2(fromNode.y-toNode.y, fromNode.x-toNode.x) < 0 ? midpoint.y - 5 : midpoint.y + 5 }
                     >
-                      42
+                      {e.weight}
                     </text>
 					</g>
 				)
