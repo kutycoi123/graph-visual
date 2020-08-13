@@ -73,7 +73,170 @@ func (g Graph) Dfs() []Node{
 	}
 	return trace
 }
+type GraphColoring struct {
+	Graph map[int32][]int32
+	Variables []int32
+	Domains []int32 // colors
+	Curr_domains map[int32][]int32 //current domains
+}
+func (g GraphColoring) String() string {
+	return fmt.Sprintf("Graph: %v\nVariables: %v\nDomains: %v\nCurrDomains: %v\n", g.Graph, g.Variables, g.Domains, g.Curr_domains)
+}
+func NewGraphColoring(g Graph, nColors int32) GraphColoring {
+	var graph_coloring GraphColoring
+	nNodes := int32(len(g.Nodes))
+	graph_coloring.Variables = make([]int32, nNodes)
+	graph_coloring.Domains = make([]int32, nColors)
+	graph_coloring.Curr_domains = make(map[int32][]int32)
+	graph_coloring.Graph = make(map[int32][]int32)
+	for i:=int32(0);i<nNodes;i++{
+		node := g.Nodes[i]
+		graph_coloring.Variables[i] = i
+		graph_coloring.Graph[node.Id] = make([]int32, len(node.Neighbors))
+		copy(graph_coloring.Graph[node.Id], node.Neighbors)
+	}
+	for i:=int32(0);i<nColors;i++{
+		graph_coloring.Domains[i] = i
+	}
+	for _, variable := range graph_coloring.Variables {
+		graph_coloring.Curr_domains[variable] = make([]int32, len(graph_coloring.Domains))
+		copy(graph_coloring.Curr_domains[variable], graph_coloring.Domains)
+	}
+	return graph_coloring
 
+}
+func (g GraphColoring) assign(variable, value int32, assignment map[int32]int32) {
+	assignment[variable] = value
+}
+func (g GraphColoring) unassign(variable int32, assignment map[int32]int32) {
+	if _,ok := assignment[variable];ok {
+		delete(assignment, variable)
+	}
+}
+func (g GraphColoring) nConflicts(variable, value int32, assignment map[int32]int32) int32{
+	conflicted := int32(0)
+	for _,neighbor := range g.Graph[variable] {
+		if _,ok := assignment[neighbor]; ok && assignment[neighbor] == value {
+			conflicted++
+		}
+	}
+	return conflicted
+}
+func (g GraphColoring) isConflicted(variable, value int32, assignment map[int32]int32) bool {
+	return g.nConflicts(variable, value, assignment) > 0
+}
+func (g GraphColoring) isSatisfied(assignment map[int32]int32) bool {
+	// Copy map
+	copied := make(map[int32]int32)
+	for key,value := range assignment {
+		copied[key] = value
+	}
+	conficted := true
+	for _,variable := range g.Variables {
+		if g.isConflicted(variable, copied[variable], copied){
+			conficted = false
+			break
+		}
+	}
+	return len(copied) == len(g.Variables) && conficted
+}
+func (g *GraphColoring) suppose(variable, value int32) [][2]int32 {
+	var removals [][2]int32
+	for _,val := range g.Curr_domains[variable] {
+		if val != value {
+			var tmp [2]int32
+			tmp[0] = variable
+			tmp[1] = val
+			removals = append(removals, tmp)
+		}
+	}
+	g.Curr_domains[variable] = make([]int32, 1)
+	g.Curr_domains[variable][0] = value
+	return removals
+}
+func (g *GraphColoring) prune(variable, value int32, removals [][2]int32) [][2]int32 {
+	index := -1
+	for i,val := range g.Curr_domains[variable] {
+		if val == value {
+			index = i
+			break
+		}
+	}
+	if index != -1 && len(removals) > 0{
+		copy(g.Curr_domains[variable][index:], g.Curr_domains[variable][index+1:])
+		g.Curr_domains[variable] = g.Curr_domains[variable][:len(g.Curr_domains[variable])-1]
+		var tmp [2]int32
+		tmp[0] = variable
+		tmp[1] = value
+		removals = append(removals, tmp)
+	}
+	return removals
+
+}
+func (g *GraphColoring) restore(removals [][2]int32) {
+	//l := len(removals)
+	for _,pair := range removals {
+		g.Curr_domains[pair[0]] = append(g.Curr_domains[pair[0]], pair[1])
+	}
+}
+func (g GraphColoring) num_legal_assignments(variable int32, assignment map[int32]int32) int {
+	return len(g.Curr_domains[variable])
+}
+func (g GraphColoring) fst_unassigned_var(assignment map[int32]int32) int32 {
+	for _,variable := range g.Variables {
+		if _,ok := assignment[variable];!ok {
+			return variable
+		}
+	}
+	return -1
+}
+func (g *GraphColoring) forward_checking_inference(variable, value int32, assignment map[int32]int32, removals [][2]int32) bool {
+	for _,neighbor := range g.Graph[variable] {
+		if _,ok := assignment[neighbor];!ok {
+			copiedNeighbors := make([]int32, len(g.Curr_domains[neighbor]))
+			copy(copiedNeighbors, g.Curr_domains[neighbor])
+			for _,val := range copiedNeighbors {
+				if val == value {
+					g.prune(neighbor, val, removals)
+				}
+			}
+			if len(g.Curr_domains[neighbor]) == 0 {
+				return false
+			}
+		}
+	}
+	return true
+}
+func (g *GraphColoring) bt(assignment map[int32]int32) map[int32]int32 {
+	if len(assignment) == len(g.Variables) {
+		return assignment
+	}
+	variable := g.fst_unassigned_var(assignment)
+	for _,value := range g.Curr_domains[variable] {
+		if !g.isConflicted(variable, value, assignment) {
+			g.assign(variable, value, assignment)
+			removals := g.suppose(variable, value)
+			if g.forward_checking_inference(variable, value, assignment, removals) {
+				res := g.bt(assignment)
+				if len(res) != 0 {
+					return res
+				}
+			}
+			g.restore(removals)
+		}
+	}
+	g.unassign(variable, assignment)
+	return map[int32]int32{}
+
+}
+func (g *GraphColoring) backtrack_search() map[int32]int32{
+	assignment := make(map[int32]int32)
+	solution := g.bt(assignment)
+	if len(solution) > 0 && g.isSatisfied(solution) {
+		return solution
+	}
+	return map[int32]int32{}
+}	
 func main() {
 	replier, _ := zmq.NewSocket(zmq.REP)
 	defer replier.Close()
@@ -95,6 +258,19 @@ func main() {
 			response, _ := json.Marshal(trace)
 			replier.SendBytes(response, 0)
 			fmt.Printf("Finish sending response")			
+		} else if message.Algo == "coloring" {
+			var solution map[int32]int32
+			for nColors:=0;nColors<len(message.Graph.Nodes)+1;nColors++{
+				graph_coloring := NewGraphColoring(message.Graph, int32(nColors)); //TODO: Bruteforce number of colors		
+				solution = graph_coloring.backtrack_search()
+				if len(solution) > 0 {
+					break
+				}
+			}
+			response, _ := json.Marshal(solution)
+			fmt.Printf("%v\n", solution)
+			replier.SendBytes(response, 0)
+			fmt.Printf("Finish sending response")
 		}
 	}
 }

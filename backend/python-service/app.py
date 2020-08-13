@@ -74,8 +74,23 @@ def dfs_go():
     socket.send(req)
     res = socket.recv()
     response = json.loads(res.decode('utf-8'))
+    return jsonify(response)  
+
+@app.route('/api/go/coloring', methods=['POST'])
+def graphColoring_go():
+    data = request.json
+    nodes = data["nodes"]
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5555")
+    reqData = {"graph":data, "algo":"coloring"}
+    req = json.dumps(reqData).encode('utf8')
+    socket.send(req)
+    res = socket.recv()
+    response = json.loads(res.decode('utf-8'))
+    print("Res: ", response)
     return jsonify(response)    
 if __name__ == "__main__":
-    app.run(debug=False,host='0.0.0.0',port=5000)
+    app.run(debug=True,host='0.0.0.0',port=5000)
 
 
