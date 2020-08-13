@@ -217,6 +217,7 @@ function GraphBoard(props) {
 		if (mode === Mode.RESET) {
 			setEdges([]);
 			setNodes([]);
+			setColorReset(true);
 			setNodeCnt(0);
 		} else if (mode === Mode.RUN) {
 			if (!colorReset) {
@@ -333,7 +334,7 @@ function GraphBoard(props) {
 					<g>
 					<marker
 	                    className={"arrow"}
-	                    id={`arrowhead${e.id}`}
+	                    id={`arrowhead${e.from}${e.to}`}
 	                    markerWidth="10"
 	                    markerHeight="7"
 	                    refX="8.7"
@@ -347,8 +348,11 @@ function GraphBoard(props) {
 						className="edge"
 						id={e.id}
 						style={{stroke: e.color || "white"}}
-						markerEnd={`url(#arrowhead${e.id})`}
+						markerEnd={`url(#arrowhead${e.from}${e.to})`}
 						onClick={() => {
+							if (mode == Mode.REMOVEEDGE) {
+								return;
+							}
 							let weight = prompt(`Please set a weight for edge from node ${e.from} to node {e.to}`);
 							let newEdges = [...edges];
 							let edge = newEdges.find(edge => e.id == edge.id);
