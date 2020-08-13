@@ -30,9 +30,9 @@ execute 'apt-get upgrade' do
   command 'apt-get dist-upgrade -y'
   only_if 'apt list --upgradeable | grep -q upgradable'
 end
-execute 'apt-get install libzmq3-dev' do
-  input 'Y'
-end
+# execute 'apt-get install libzmq3-dev' do
+#   input 'Y'
+# end
 
 directory '/opt'
 directory '/opt/installers'
@@ -138,7 +138,7 @@ package ['nodejs']
 # ZeroMQ-related things
 
 # C/C++ library and dev library
-#package ['libzmq5', 'libzmq5-dev']
+package ['libzmq5', 'libzmq5-dev']
 # Python pyzmq library
 execute 'pip3 install pyzmq==19.0.1' do
  creates "#{python3_packages}/zmq/__init__.py"
@@ -171,6 +171,7 @@ end
 execute 'pip3 install -r requirements.txt' do
   cwd python_service  
 end  
+ 
 
 # GraalVM
 

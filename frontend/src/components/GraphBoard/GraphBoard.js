@@ -6,10 +6,10 @@ import './GraphBoard.css';
 const URL = "http://localhost:5000";
 
 function GraphBoard(props) {
-	let random_graph = CREATE_UNDIRECTIONAL_GRAPH(12);
+	let random_graph = CREATE_UNDIRECTIONAL_GRAPH(5);
 	const [nodes, setNodes] = useState(random_graph.nodes);
 	const [edges, setEdges] = useState(random_graph.edges);
-	const [nodeCnt, setNodeCnt] = useState(0);
+	const [nodeCnt, setNodeCnt] = useState(nodes.length);
 	const [pairNode, setPairNode] = useState({
 		from: undefined,
 		to: undefined
@@ -21,7 +21,23 @@ function GraphBoard(props) {
 	} = props;
 	const graph = useRef();
 	const clickedNode = useRef();
+	const calculateCurve = ( x1, y1, x2, y2 ) => {
+	  var mpx = (x2 + x1) * 0.5;
+	  var mpy = (y2 + y1) * 0.5;
 
+	  // angle of perpendicular to line:
+	  var theta = Math.atan2(y2 - y1, x2 - x1) - Math.PI / 2;
+
+	  // distance of control point from mid-point of line:
+	  var offset = 30;
+
+	  // location of control point:
+	  var c1x = mpx + offset * Math.cos(theta);
+	  var c1y = mpy + offset * Math.sin(theta);
+	  //let directedPath = `M${x1} ${y1} Q${c1x} ${c1y} ${x2} ${y2}`;
+	  //return directedPath;
+	  return {x: c1x, y: c1y};
+	};
 	const calculateAccurateCoords = (x1, y1, x2, y2) => {
 	  let dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 	  let ratio = (dist - Mode.NODE_RADIUS) / dist; 
@@ -311,14 +327,39 @@ function GraphBoard(props) {
 			{edges.map((e, idx) => {
 				const fromNode = nodes.find(node => node.id == e.from);
 				const toNode = nodes.find(node => node.id == e.to);
-				const intersectPoint = calculateAccurateCoords(fromNode.x, fromNode.y, toNode.x, toNode.y);
+				const intersectPoint1 = calculateAccurateCoords(fromNode.x, fromNode.y, toNode.x, toNode.y);
+				const intersectPoint2 = calculateAccurateCoords(toNode.x, toNode.y, fromNode.x, fromNode.y);
+				const midpoint = calculateCurve(intersectPoint2.x, intersectPoint2.y, intersectPoint1.x, intersectPoint1.y);
 				const startPoint = calculateAccurateCoords(toNode.x, toNode.y, fromNode.x, fromNode.y);
-				return (<path 
-					d={`M${startPoint.x},${startPoint.y} L${intersectPoint.x},${intersectPoint.y}`}
-					className="edge"
-					id={`${fromNode.id} ${toNode.id}`}
-					style={{stroke: e.color || "white"}}
-				/>
+				return (
+					<g>
+					<marker
+	                    className={"arrow"}
+	                    id={`arrowhead${e.from}${e.to}`}
+	                    markerWidth="10"
+	                    markerHeight="7"
+	                    refX="8.7"
+	                    refY="3.5"
+	                    orient="auto"
+                  	>
+                    	<polygon points="0 0, 10 3.5, 0 7" />
+                  	</marker>
+					<path 
+						d={`M${intersectPoint1.x} ${intersectPoint1.y} Q${midpoint.x} ${midpoint.y} ${intersectPoint2.x} ${intersectPoint2.y}`}
+						//d={curve}
+						className="edge"
+						id={`${fromNode.id} ${toNode.id}`}
+						style={{stroke: e.color || "white"}}
+						markerEnd={`url(#arrowhead${e.from}${e.to})`}
+					/>
+					<text
+                      className="edge-weight"
+                      x={Math.atan2(fromNode.y-toNode.y, fromNode.x-toNode.x) < 0 ? midpoint.x : midpoint.x }
+                      y={Math.atan2(fromNode.y-toNode.y, fromNode.x-toNode.x) < 0 ? midpoint.y - 5 : midpoint.y + 5 }
+                    >
+                      42
+                    </text>
+					</g>
 				)
 			})}
 

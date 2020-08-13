@@ -9,7 +9,7 @@ export const Mode = {
 	RESET: 7,
 	FINISH: 8,
 	RESETCOLOR: 9,
-	NODE_RADIUS: 20
+	NODE_RADIUS: 30
 
 };
 export const COLOR_MAPPING = {
@@ -28,7 +28,7 @@ export const COLOR_MAPPING = {
 }
 function isOverlapped(x, y, nodes){
 	for (let node of nodes) {
-		if (Math.sqrt(Math.pow(x - node.x, 2) + Math.pow(y - node.y,2)) <= Mode.NODE_RADIUS) {
+		if (Math.sqrt(Math.pow(x - node.x, 2) + Math.pow(y - node.y,2)) < 2*Mode.NODE_RADIUS) {
 			return true;
 		}
 	}
@@ -49,7 +49,6 @@ function create_node(id, nodes) {
 	do {
 		x = Math.floor(Math.random() * 1000 + 30);
 		y = Math.floor(Math.random() * 700 + 20);
-		console.log(x, y);
 	}while(isOverlapped(x, y, nodes));
 	return {x, y, id, neighbors: []};
 }
