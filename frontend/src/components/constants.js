@@ -63,6 +63,7 @@ export function CREATE_UNDIRECTIONAL_GRAPH(nNodes) {
 	for (let i = 0; i < nodes.length; ++i)  {
 		let fromNode = nodes[i];
 		for (let j = 0; j < nodes.length && fromNode.neighbors.length < maxNeighbors; ++j) {
+			if (j == i) continue;
 			let toNode = nodes[j];
 			let is_neighbor = Math.round(Math.random() * 1);
 			if (is_neighbor) {

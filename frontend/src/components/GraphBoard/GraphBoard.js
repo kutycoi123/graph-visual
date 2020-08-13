@@ -246,7 +246,7 @@ function GraphBoard(props) {
 					for (let node of trace) {
 						let colorEdge = setTimeout(() => {
 							newEdges = replaceEdge(node.parent, node.id, {color: "green"}, newEdges);
-							newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
+							//newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
 							setEdges(newEdges);
 							clearTimeout(colorEdge);
 						}, 500*i);
@@ -333,7 +333,7 @@ function GraphBoard(props) {
 					<g>
 					<marker
 	                    className={"arrow"}
-	                    id={`arrowhead${e.from}${e.to}`}
+	                    id={`arrowhead${e.id}`}
 	                    markerWidth="10"
 	                    markerHeight="7"
 	                    refX="8.7"
@@ -347,7 +347,7 @@ function GraphBoard(props) {
 						className="edge"
 						id={e.id}
 						style={{stroke: e.color || "white"}}
-						markerEnd={`url(#arrowhead${e.from}${e.to})`}
+						markerEnd={`url(#arrowhead${e.id})`}
 						onClick={() => {
 							let weight = prompt(`Please set a weight for edge from node ${e.from} to node {e.to}`);
 							let newEdges = [...edges];
