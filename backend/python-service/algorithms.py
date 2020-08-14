@@ -88,18 +88,11 @@ class Dijkstra(GraphAlgorithm):
         dist = {node:{"dist": sys.maxsize, "parent": -1} for node in self.graph}
         dist[self.start["id"]]["dist"] = 0
         sptSet = {node:False for node in self.graph}
-        u = None
-        prev = None
         for _ in range(len(self.edges)):
-            prev = u
             u = self.minDist(dist, sptSet)
             if u == -1:
                 break
-            #parent = prev
             parent = dist[u]["parent"]
-            # for i in range(len(self.trace)-1, -1, -1):
-            #     if self.trace[i]["status"] == "visited":
-            #         parent = self.trace[i]["node"]
             self.trace.append({"id":u,"status":"visited", "parent":parent})
             sptSet[u] = True
             for neighbor in self.graph[u]:

@@ -1,5 +1,5 @@
-ubuntu_mirror = 'http://mirror.its.sfu.ca/mirror/ubuntu/'
-# ubuntu_mirror = 'http://mirror.csclub.uwaterloo.ca/ubuntu/'
+#ubuntu_mirror = 'http://mirror.its.sfu.ca/mirror/ubuntu/'
+ubuntu_mirror = 'http://mirror.csclub.uwaterloo.ca/ubuntu/'
 ubuntu_release = 'bionic'
 ubuntu_version = '18.04'
 username = 'vagrant'
@@ -171,7 +171,24 @@ end
 execute 'pip3 install -r requirements.txt' do
   cwd python_service  
 end  
- 
+
+# execute 'nohup node server.js &' do
+#   cwd frontend
+#   user username
+#   environment 'HOME' => user_home
+# end
+
+# execute 'screen -dm python3 app.py &' do
+#   cwd python_service
+#   user username
+#   environment 'HOME' => user_home
+# end
+
+# execute 'screen -dm go run app.go &' do
+#   cwd go_service
+#   user username
+#   environment 'HOME' => user_home
+# end
 
 # GraalVM
 

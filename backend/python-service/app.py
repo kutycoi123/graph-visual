@@ -67,6 +67,7 @@ def bfs_go():
     socket.connect("tcp://localhost:5555")
     reqData = {"graph": data, "algo": "bfs"}
     req = json.dumps(reqData).encode('utf8')
+    print("Sending to go service")
     socket.send(req)
     res = socket.recv()
     response = json.loads(res.decode('utf-8'))
@@ -91,7 +92,6 @@ def dfs_go():
 @app.route('/api/go/coloring', methods=['POST'])
 def graphColoring_go():
     data = request.json
-    nodes = data["nodes"]
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
     socket.connect("tcp://localhost:5555")
@@ -102,6 +102,18 @@ def graphColoring_go():
     response = json.loads(res.decode('utf-8'))
     return jsonify(response)    
 
+@app.route('/api/go/dijkstra', methods=['POST'])
+def dijkstra_go():
+    data = request.json
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5555")
+    reqData = {"graph":data, "algo":"dijkstra"}
+    req = json.dumps(reqData).encode('utf8')
+    socket.send(req)
+    res = socket.recv()
+    response = json.loads(res.decode('utf-8'))
+    return jsonify(response)  
 
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0',port=5000)

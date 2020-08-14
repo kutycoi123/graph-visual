@@ -8,12 +8,19 @@ type Node struct {
 	Id int32 `json:"id"`
 	Neighbors []int32 `json:"neighbors"`
 	Parent int32 `json:"parent"`
+	Status string `json:"status"`
+}
+type Edge struct {
+	From int32 `json:"from"`
+	To int32 `json:"to"`
+	Weight int64
 }
 func (n Node) String() string {
 	return fmt.Sprintf("{id:%v neighbors:%v}", n.Id, n.Neighbors)
 }
 type Graph struct {
 	Nodes []Node `json:"nodes"`
+	Edges []Edge `json:"edges"`
 	StartNode Node `json:"startNode"`
 }
 func (n Graph) String() string {
@@ -35,11 +42,19 @@ func (g Graph) Get_neighbors(id int32) []int32 {
 	}
 	return []int32{}
 }
+func (g Graph) Get_edge(from int32, to int32) Edge {
+	for _,edge := range g.Edges {
+		if edge.From == from && edge.To == to {
+			return edge
+		}
+	}
+	return Edge{}
+}
 func (g Graph) Bfs() []Node{
 	var trace []Node
 	visited := make(map[int32]bool)
 	var cur Node
-	queue := []Node{Node{g.StartNode.Id, g.StartNode.Neighbors, -1}}	
+	queue := []Node{Node{g.StartNode.Id, g.StartNode.Neighbors, -1, ""}}	
 	for len(queue) > 0 {
 		cur, queue = queue[0], queue[1:]
 		if _,ok := visited[cur.Id]; !ok {
@@ -48,7 +63,7 @@ func (g Graph) Bfs() []Node{
 		}
 		for _, id := range cur.Neighbors {
 			if _,ok := visited[id]; !ok {
-				queue = append(queue, Node{id, g.Get_neighbors(id), cur.Id})
+				queue = append(queue, Node{id, g.Get_neighbors(id), cur.Id, ""})
 			}
 		}
 	}
@@ -58,7 +73,7 @@ func (g Graph) Dfs() []Node{
 	var trace []Node
 	visited := make(map[int32]bool)
 	var cur Node
-	queue := []Node{Node{g.StartNode.Id, g.StartNode.Neighbors, -1}}	
+	queue := []Node{Node{g.StartNode.Id, g.StartNode.Neighbors, -1, ""}}	
 	for len(queue) > 0 {
 		cur, queue = queue[len(queue)-1], queue[:len(queue)-1]
 		if _,ok := visited[cur.Id]; !ok {
@@ -67,7 +82,7 @@ func (g Graph) Dfs() []Node{
 		}
 		for _, id := range cur.Neighbors {
 			if _,ok := visited[id]; !ok {
-				queue = append(queue, Node{id, g.Get_neighbors(id), cur.Id})
+				queue = append(queue, Node{id, g.Get_neighbors(id), cur.Id, ""})
 			}
 		}
 	}
@@ -238,6 +253,52 @@ func (g *GraphColoring) backtrack_search() map[int32]int32{
 	return map[int32]int32{}
 }	
 
+func minDist(dist map[int32]int64, sptSet map[int32]bool) int32 {
+	var minDist int64 = 1 << 63 - 1 //maximum int64	
+	var minNode int32 = -1
+	for node,d := range dist {
+		if d < minDist && sptSet[node] == false {
+			minDist = d
+			minNode = node
+		}
+	}
+	return minNode
+}
+
+func (graph Graph) dijkstra() []Node{
+	trace := make([]Node, 0)
+	dist := make(map[int32]int64) //dist map
+	parent := make(map[int32]int32) // parent map
+	sptSet := make(map[int32]bool) //visited node map
+	var maxsize int64 = 1 << 63 - 1 //maximum int64
+
+	// Init dist map and parent map
+	for _,node := range graph.Nodes {
+		dist[node.Id] = maxsize
+		parent[node.Id] = -1
+		sptSet[node.Id] = false
+	}
+	dist[graph.StartNode.Id] = 0
+	for i:=0;i<len(graph.Edges);i++ {
+		u := minDist(dist, sptSet)
+		if u == -1 {
+			break
+		}
+		par := parent[u]
+		trace = append(trace, Node{u,[]int32{},par,"visited"})
+		sptSet[u] = true
+		for _,neighbor := range graph.Get_neighbors(u) {
+			trace = append(trace, Node{neighbor, []int32{}, u, "visiting"})
+			edge := graph.Get_edge(u, neighbor)
+			if !sptSet[neighbor] && dist[neighbor] > dist[u] + edge.Weight {
+				dist[neighbor] = dist[u] + edge.Weight
+				parent[neighbor] = u
+			}
+		}
+	}
+	return trace
+
+}
 func main() {
 	replier, _ := zmq.NewSocket(zmq.REP)
 	defer replier.Close()
@@ -245,17 +306,16 @@ func main() {
 	for {
 		request, _ := replier.RecvBytes(0)
 		var message Request
+		fmt.Println("Receiving messages")
 		json.Unmarshal(request, &message)
 		fmt.Printf("%v\n", message)
 		if message.Algo == "bfs" {
 			trace := message.Graph.Bfs()
-			fmt.Printf("Bfs trace: %v\n", trace)
 			response, _ := json.Marshal(trace)
 			replier.SendBytes(response, 0)
 			fmt.Printf("Finish sending response")
 		} else if message.Algo == "dfs" {
 			trace := message.Graph.Dfs()
-			fmt.Printf("Dfs trace: %v\n", trace)
 			response, _ := json.Marshal(trace)
 			replier.SendBytes(response, 0)
 			fmt.Printf("Finish sending response")			
@@ -270,6 +330,11 @@ func main() {
 			}
 			response, _ := json.Marshal(solution)
 			fmt.Printf("%v\n", solution)
+			replier.SendBytes(response, 0)
+			fmt.Printf("Finish sending response")
+		} else if message.Algo == "dijkstra" {
+			trace := message.Graph.dijkstra()
+			response, _ := json.Marshal(trace)
 			replier.SendBytes(response, 0)
 			fmt.Printf("Finish sending response")
 		}

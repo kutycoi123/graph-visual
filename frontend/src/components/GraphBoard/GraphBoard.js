@@ -343,7 +343,8 @@ function GraphBoard(props) {
 							
 						}
 						i++;
-					}					
+					}
+					setColorReset(false);					
 				})
 			}
 			handleChangeMode(Mode.FINISH);
@@ -405,11 +406,13 @@ function GraphBoard(props) {
 								return;
 							}
 							let weight = parseInt(prompt(`Please set a weight for edge from node ${e.from} to node {e.to}`));
-							if (!Number.isNaN(weight)) {
+							if (!Number.isNaN(weight) && weight >= 0) {
 								let newEdges = [...edges];
 								let edge = newEdges.find(edge => e.id == edge.id);
 								edge.weight = weight;
 								setEdges(newEdges);
+							}else {
+								alert("Weight must be a number and non-negative")
 							}
 
 						}}
