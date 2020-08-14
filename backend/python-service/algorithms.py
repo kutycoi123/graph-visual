@@ -1,5 +1,5 @@
-
-
+import sys
+from collections import namedtuple
 class Algorithm:
     def __init__(self, name):
         self.name = name
@@ -63,6 +63,53 @@ class DFS(GraphAlgorithm):
     def run(self):
         return self.dfs()
 
+Edge = namedtuple('Edge', ['fromNode', 'toNode'])
+class Dijkstra(GraphAlgorithm):
+    def __init__(self, nodes, edges, start):
+        super().__init__('dijkstra', nodes)
+        self.graph = {}
+        self.edges = {}
+        self.trace = []
+        for node in nodes:
+            self.graph[node["id"]] = node["neighbors"]     
+        for edge in edges:
+            self.edges[Edge(edge["from"], edge["to"])] = edge["weight"]
+        self.start = start
+
+    def minDist(self, dist, sptSet):
+        minDist = sys.maxsize
+        minNode = -1
+        for node in dist:
+            if dist[node]["dist"] < minDist and sptSet[node] == False:
+                minDist = dist[node]["dist"]
+                minNode = node
+        return minNode
+    def dijkstra(self):
+        dist = {node:{"dist": sys.maxsize, "parent": -1} for node in self.graph}
+        dist[self.start["id"]]["dist"] = 0
+        sptSet = {node:False for node in self.graph}
+        u = None
+        prev = None
+        for _ in range(len(self.edges)):
+            prev = u
+            u = self.minDist(dist, sptSet)
+            if u == -1:
+                break
+            #parent = prev
+            parent = dist[u]["parent"]
+            # for i in range(len(self.trace)-1, -1, -1):
+            #     if self.trace[i]["status"] == "visited":
+            #         parent = self.trace[i]["node"]
+            self.trace.append({"id":u,"status":"visited", "parent":parent})
+            sptSet[u] = True
+            for neighbor in self.graph[u]:
+                self.trace.append({"id": neighbor, "status":"visiting", "parent": u})
+                if sptSet[neighbor] == False and dist[neighbor]["dist"] > dist[u]["dist"] + self.edges[Edge(u, neighbor)]:
+                    dist[neighbor]["dist"] = dist[u]["dist"] + self.edges[Edge(u,neighbor)]
+                    dist[neighbor]["parent"] = u
+        return self.trace
+    def run(self):
+        return self.dijkstra()
 
 class GraphColoring(GraphAlgorithm):
     def __init__(self, nodes, nColors):

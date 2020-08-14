@@ -44,6 +44,18 @@ def graphColoring_python():
         if sol:
             return jsonify(sol)
     return jsonify({})
+
+@app.route('/api/python/dijkstra', methods=['POST'])    
+def dijkstra_python():
+    data = request.json
+    nodes = data["nodes"]
+    edges = data["edges"]
+    startNode = data["startNode"]
+    dijkstra = algo.Dijkstra(nodes, edges, startNode)
+    trace = dijkstra.run()
+    return jsonify(trace)
+
+
 @app.route('/api/go/bfs', methods=['POST'])
 def bfs_go():
     data = request.json
@@ -88,8 +100,9 @@ def graphColoring_go():
     socket.send(req)
     res = socket.recv()
     response = json.loads(res.decode('utf-8'))
-    print("Res: ", response)
     return jsonify(response)    
+
+
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0',port=5000)
 

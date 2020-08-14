@@ -153,7 +153,7 @@ function GraphBoard(props) {
 						fromNode.color = toNode.color = "white";
 						fromNode.neighbors.push(toNode.id);
 						//toNode.neighbors.push(fromNode.id);
-						const newEdges = [...edges, {from: fromNode.id, to: toNode.id, weight: 0, id: `${fromNode.i} ${toNode.id}`}]
+						const newEdges = [...edges, {from: fromNode.id, to: toNode.id, weight: 0, id: `${fromNode.id} ${toNode.id}`}]
 						const newNodes = [...nodes];
 						setPairNode({});
 						setNodes(newNodes);
@@ -294,6 +294,57 @@ function GraphBoard(props) {
 					}
 					setColorReset(false);
 				})
+			} else if (algo == "dijkstra") {
+				axios({
+					url: `${URL}/api/${service}/${algo}`,
+					method: "post",
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					data: {
+						"nodes": nodes.map(e => {
+							return {id: e.id, neighbors: e.neighbors};
+						}),
+						"edges": edges,
+						"startNode": {id: nodes[0].id, neighbors: nodes[0].neighbors}
+					}
+				}).then(res => {
+					let trace = res.data;
+					let i = 1;
+					let newNodes = nodes;
+					let newEdges = edges;
+					console.log(trace)
+					for (let node of trace) {
+						if (node.status=="visited") {
+							let colorNode = setTimeout(() => {
+								newNodes = replaceNode(node.id, {color: "red"}, newNodes);
+								setNodes(newNodes);
+								clearTimeout(colorNode);
+							}, 1000*i)
+							let colorEdge = setTimeout(() => {
+								newEdges = replaceEdge(node.parent, node.id, {color: "green"}, newEdges);
+								//newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
+								setEdges(newEdges);
+								clearTimeout(colorEdge);
+							}, 1002*i);							        
+						} else {
+							let colorEdge1 = setTimeout(() => {
+								newEdges = replaceEdge(node.parent, node.id, {color: "red"}, newEdges);
+								//newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
+								setEdges(newEdges);														
+								clearTimeout(colorEdge1);
+								let colorEdge2 = setTimeout(() => {
+									newEdges = replaceEdge(node.parent, node.id, {color: "white"}, newEdges);
+									//newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
+									setEdges(newEdges);
+									clearTimeout(colorEdge2);
+								}, 1000);
+							}, 1001*i);	
+							
+						}
+						i++;
+					}					
+				})
 			}
 			handleChangeMode(Mode.FINISH);
 		} else if (mode == Mode.RESETCOLOR) {
@@ -353,11 +404,14 @@ function GraphBoard(props) {
 							if (mode == Mode.REMOVEEDGE) {
 								return;
 							}
-							let weight = prompt(`Please set a weight for edge from node ${e.from} to node {e.to}`);
-							let newEdges = [...edges];
-							let edge = newEdges.find(edge => e.id == edge.id);
-							edge.weight = weight;
-							setEdges(newEdges);
+							let weight = parseInt(prompt(`Please set a weight for edge from node ${e.from} to node {e.to}`));
+							if (!Number.isNaN(weight)) {
+								let newEdges = [...edges];
+								let edge = newEdges.find(edge => e.id == edge.id);
+								edge.weight = weight;
+								setEdges(newEdges);
+							}
+
 						}}
 					/>
 					<text

@@ -30,6 +30,7 @@ function Main() {
 					<option value="bfs">BFS</option>
 					<option value="dfs">DFS</option>
 					<option value="coloring">Graph coloring</option>
+					<option value="dijkstra">Dijkstra</option>
 				</select>
 				<select name="service" id="service-select" onChange={(e) => setService(e.target.value)}>
 					<option value="python">Python</option>

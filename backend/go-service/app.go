@@ -237,6 +237,7 @@ func (g *GraphColoring) backtrack_search() map[int32]int32{
 	}
 	return map[int32]int32{}
 }	
+
 func main() {
 	replier, _ := zmq.NewSocket(zmq.REP)
 	defer replier.Close()
