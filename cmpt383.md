@@ -2,7 +2,7 @@
 Project is designed to help visualize graph algorithms intuitively and interactively
 ## Stack
 + Language: JavaScript, Python and Golang
-+ Framework: React, Express, Flask
++ Framework: React, Express, Flask, ZeroMQ
 + Communication methods: HTTP, Message Queue(ZeroMQ)
 ## Architecture
 ![Architecture](/images/383-project.jpg)
