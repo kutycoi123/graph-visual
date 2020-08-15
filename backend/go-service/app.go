@@ -371,7 +371,9 @@ func (g Graph) Mst() []Edge {
 		edges = edges[1:]
 		fromNode := nodes[minEdge.From]
 		toNode := nodes[minEdge.To]
-		if fromNode.parent != toNode.parent {
+		fromNodeRoot := fromNode.find()
+		toNodeRoot := toNode.find()
+		if fromNodeRoot != toNodeRoot {
 			mst[i] = minEdge
 			i++
 			fromNode.union(&toNode)

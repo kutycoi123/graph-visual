@@ -251,7 +251,9 @@ class MST(GraphAlgorithm):
                     fromNode = node
                 elif node.id == minEdge["to"]:
                     toNode = node
-            if fromNode.parent != toNode.parent:
+            fromNodeRoot = find(fromNode)
+            toNodeRoot = find(toNode)
+            if fromNodeRoot != toNodeRoot:
                 sol.append(minEdge)
                 union(fromNode, toNode)
         return sol
