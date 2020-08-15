@@ -62,7 +62,6 @@ def mst_python():
     edges = data["edges"]
     mst = algo.MST(nodes, edges)
     sol = mst.run()
-    #print(sol)
     return jsonify(sol)
 
 @app.route('/api/go/bfs', methods=['POST'])
@@ -76,7 +75,6 @@ def bfs_go():
     socket.connect("tcp://localhost:5555")
     reqData = {"graph": data, "algo": "bfs"}
     req = json.dumps(reqData).encode('utf8')
-    print("Sending to go service")
     socket.send(req)
     res = socket.recv()
     response = json.loads(res.decode('utf-8'))

@@ -395,7 +395,7 @@ func main() {
 	for {
 		request, _ := replier.RecvBytes(0)
 		var message Request
-		fmt.Println("Receiving messages")
+		fmt.Println("Receiving messages\n")
 		json.Unmarshal(request, &message)
 		fmt.Printf("%v\n", message)
 		if message.Algo == "bfs" {
