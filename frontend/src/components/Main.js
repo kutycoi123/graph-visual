@@ -31,6 +31,7 @@ function Main() {
 					<option value="dfs">DFS</option>
 					<option value="coloring">Graph coloring</option>
 					<option value="dijkstra">Dijkstra</option>
+					<option value="mst">MST-Kruskal</option>
 				</select>
 				<select name="service" id="service-select" onChange={(e) => setService(e.target.value)}>
 					<option value="python">Python</option>

@@ -55,6 +55,15 @@ def dijkstra_python():
     trace = dijkstra.run()
     return jsonify(trace)
 
+@app.route('/api/python/mst', methods=['POST'])    
+def mst_python():
+    data = request.json
+    nodes = data["nodes"]
+    edges = data["edges"]
+    mst = algo.MST(nodes, edges)
+    sol = mst.run()
+    #print(sol)
+    return jsonify(sol)
 
 @app.route('/api/go/bfs', methods=['POST'])
 def bfs_go():

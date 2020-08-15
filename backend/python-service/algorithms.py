@@ -202,7 +202,63 @@ class GraphColoring(GraphAlgorithm):
         if solution and self.isSatisfied(solution):
             return solution
         return None
-        
+class MSTNode():
+    def __init__(self, id, rank):
+        self.id = id
+        self.parent = self
+        self.rank = rank
+
+class MST(GraphAlgorithm):
+    def __init__(self, nodes, edges):
+        super().__init__('minimum spanning tree', nodes)
+        self.edges = []
+        sortedEdges = sorted(edges, key = lambda edge: edge["weight"])
+        for i in range(len(sortedEdges)):
+            check = True
+            for j in range(0, i, 1):
+                if sortedEdges[j]["to"] == sortedEdges[i]["from"] and \
+                    sortedEdges[j]["from"] == sortedEdges[i]["to"]:
+                    check = False
+                    break
+            if check:
+                self.edges.append(sortedEdges[i])
+        print(self.edges)
+    def mst(self):
+        def find(x):
+            if x.parent != x:
+                x.parent = find(x.parent)
+            return x.parent
+        def union(x, y):
+            xRoot = find(x)
+            yRoot = find(y)
+            if xRoot == yRoot:
+                return
+            if xRoot.rank < yRoot.rank:
+                xRoot, yRoot = yRoot, xRoot
+            yRoot.parent = xRoot
+            if xRoot.rank == yRoot.rank:
+                xRoot.rank = xRoot.rank +  1       
+
+        nodes = [MSTNode(n["id"], 1) for n in self.nodes]
+        for node in nodes:
+            node.parent = node
+        sol = []
+        while len(sol) < len(self.nodes) - 1 and self.edges:
+            minEdge = self.edges.pop(0)
+            fromNode = None
+            toNode = None
+            for node in nodes:
+                if node.id == minEdge["from"]:
+                    fromNode = node
+                elif node.id == minEdge["to"]:
+                    toNode = node
+            if fromNode.parent != toNode.parent:
+                sol.append(minEdge)
+                union(fromNode, toNode)
+        return sol
+    def run(self):
+        return self.mst()
+
                     
                     
                     

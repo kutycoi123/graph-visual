@@ -346,6 +346,35 @@ function GraphBoard(props) {
 					}
 					setColorReset(false);					
 				})
+			} else if(algo == "mst") {
+
+				axios({
+					url: `${URL}/api/${service}/${algo}`,
+					method: "post",
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					data: {
+						"nodes": nodes.map(e => {
+							return {id: e.id, neighbors: e.neighbors};
+						}),
+						"edges": edges,
+					}
+				}).then(res => {
+					let mst = res.data;
+					let newEdges = [...edges];
+					let i = 0;
+					for (let edge of mst) {
+						let colorEdge = setTimeout(() => {
+							newEdges = replaceEdge(edge.from, edge.to, {color: "green"}, newEdges);
+							//newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
+							setEdges(newEdges);
+							clearTimeout(colorEdge);
+						}, 700*i);
+						i++;
+					}						
+					setColorReset(false);	
+				})
 			}
 			handleChangeMode(Mode.FINISH);
 		} else if (mode == Mode.RESETCOLOR) {
