@@ -11,5 +11,5 @@ Project is designed to help visualize graph algorithms intuitively and interacti
 2. Open on browser: http://localhost:3000                                     
 ## Features
 1. Interactive UI: Users can create, delete, move nodes and edges of a graph
-2. Backend executes graph algorithms correctly and efficiently
+2. Backends (Python and Golang servers) execute graph algorithms correctly and efficiently
 3. Frontend displays graph algorithms in a iterative and accurate way.  

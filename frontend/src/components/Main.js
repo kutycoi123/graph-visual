@@ -19,7 +19,7 @@ function Main() {
 	const [mode, setMode] = useState();
 	const [algo, setAlgo] = useState("bfs");
 	const [service, setService] = useState("python");
-	const [showModal, setShowModal] = useState(false);
+	const [showModal, setShowModal] = useState(true);
 	const handleChangeMode = (mode) => {
 		setMode(mode);
 	}	
@@ -117,18 +117,18 @@ function Main() {
 		        </Modal.Header>
 		        <Modal.Body>
 					This app is developed to visualize some graph algorithms.
-					<p>There are a heade, which includes buttons, and canvas, which is the biggest area to display graph</p>
-		        	<p>There are a 9 buttons on the header, all of which will help you interact with graph 
+					<p>There are a header, which includes buttons, and canvas, which is the main area to display graph</p>
+		        	<p>There are 9 buttons on the header, all of which will help you interact with graph 
 		        	by specific operations:</p>
-		        	<p>1.Run algorithm: Send request to run an algorithm to a chosen server</p>
-		        	<p>2.Draw node: Draw nodes by clicking on canvas</p>
-		        	<p>3.Move node: Move nodes around by dragging them</p>
-		        	<p>4.Remove node: Remove nodes by clicking on them</p>
-		        	<p>5.Draw edge: Draw a new edge by clicking a source node(red) and a target node(green).</p>
-		        	<p>6.Remove edge: Remove edges by clicking on them</p>
-		        	<p>7.Reset algorithm: Reset the algorithm and reset color to run new one</p>
-		        	<p>8.Reset graph: Remove all nodes and edges</p>
-		        	<p>9.Instruction: Display instruction</p>
+		        	<p>1.<strong>Run algorithm</strong>: Send request to run an algorithm to a chosen server</p>
+		        	<p>2.<strong>Draw node</strong>: Draw nodes by clicking on canvas</p>
+		        	<p>3.<strong>Move node</strong>: Move nodes around by dragging them</p>
+		        	<p>4.<strong>Remove node</strong>: Remove nodes by clicking on them</p>
+		        	<p>5.<strong>Draw edge</strong>: Draw a new edge by clicking a source node(red) and a target node(green).</p>
+		        	<p>6.<strong>Remove edge</strong>: Remove edges by clicking on them</p>
+		        	<p>7.<strong>Reset algorithm</strong>: Reset the algorithm and reset color to run new one</p>
+		        	<p>8.<strong>Reset graph</strong>: Remove all nodes and edges</p>
+		        	<p>9.<strong>Instruction</strong>: Display instruction</p>
 		        	<p><strong>Note</strong>: You can edit edge weight by clicking on each edge. 
 					   You can only do this when you are not in "Remove edge" mode.
 					</p>
