@@ -6,12 +6,12 @@ export const Mode = {
 	REMOVENODE: 4,
 	REMOVEEDGE: 5,
 	DRAWEDGE: 6,
-	RESET: 7,
+	RESETGRAPH: 7,
 	FINISH: 8,
-	RESETCOLOR: 9,
-	NODE_RADIUS: 30
+	RESETALGO: 9,
 
 };
+export const NODE_RADIUS = 30;
 export const COLOR_MAPPING = {
 	0: '#eb4034',
 	1: '#f7a92a',
@@ -28,7 +28,7 @@ export const COLOR_MAPPING = {
 }
 function isOverlapped(x, y, nodes){
 	for (let node of nodes) {
-		if (Math.sqrt(Math.pow(x - node.x, 2) + Math.pow(y - node.y,2)) < 2*Mode.NODE_RADIUS) {
+		if (Math.sqrt(Math.pow(x - node.x, 2) + Math.pow(y - node.y,2)) < 2*NODE_RADIUS) {
 			return true;
 		}
 	}

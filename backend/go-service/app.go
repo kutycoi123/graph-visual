@@ -5,6 +5,7 @@ import (
 	"sort"
 	zmq "github.com/pebbe/zmq4"
 )
+
 type Node struct {
 	Id int32 `json:"id"`
 	Neighbors []int32 `json:"neighbors"`
@@ -16,21 +17,26 @@ type Edge struct {
 	To int32 `json:"to"`
 	Weight int64
 }
-func (n Node) String() string {
-	return fmt.Sprintf("{id:%v neighbors:%v}", n.Id, n.Neighbors)
-}
+
 type Graph struct {
 	Nodes []Node `json:"nodes"`
 	Edges []Edge `json:"edges"`
 	StartNode Node `json:"startNode"`
 }
-func (n Graph) String() string {
-	return fmt.Sprintf("{nodes:%v startNode:%v}", n.Nodes, n.StartNode)
-}
+
 type Request struct {
 	Graph Graph `json:"graph"`
 	Algo string `json:"algo"`
 }
+
+func (n Node) String() string {
+	return fmt.Sprintf("{id:%v neighbors:%v}", n.Id, n.Neighbors)
+}
+
+func (n Graph) String() string {
+	return fmt.Sprintf("{nodes:%v startNode:%v}", n.Nodes, n.StartNode)
+}
+
 func (n Request) String() string {
 	return fmt.Sprintf("{graph:%v algo:%v}", n.Graph, n.Algo)
 }
@@ -89,15 +95,15 @@ func (g Graph) Dfs() []Node{
 	}
 	return trace
 }
+
+/* Graph Coloring - Brute force */
 type GraphColoring struct {
 	Graph map[int32][]int32
 	Variables []int32
 	Domains []int32 // colors
 	Curr_domains map[int32][]int32 //current domains
 }
-func (g GraphColoring) String() string {
-	return fmt.Sprintf("Graph: %v\nVariables: %v\nDomains: %v\nCurrDomains: %v\n", g.Graph, g.Variables, g.Domains, g.Curr_domains)
-}
+
 func NewGraphColoring(g Graph, nColors int32) GraphColoring {
 	var graph_coloring GraphColoring
 	nNodes := int32(len(g.Nodes))
@@ -252,8 +258,11 @@ func (g *GraphColoring) backtrack_search() map[int32]int32{
 		return solution
 	}
 	return map[int32]int32{}
-}	
+}
 
+/* END Graph Coloring */	
+
+/* Dijkstra algorithm*/
 func minDist(dist map[int32]int64, sptSet map[int32]bool) int32 {
 	var minDist int64 = 1 << 63 - 1 //maximum int64	
 	var minNode int32 = -1
@@ -300,7 +309,8 @@ func (graph Graph) dijkstra() []Node{
 	return trace
 
 }
-
+/*END Dijsktra*/
+/* Minimum Spanning Tree - Kruskal algorithm*/
 type MSTNode struct {
 	id int32
 	rank int64
@@ -370,6 +380,7 @@ func (g Graph) Mst() []Edge {
 	return mst
 
 }
+/*END MST*/
 func main() {
 	replier, _ := zmq.NewSocket(zmq.REP)
 	defer replier.Close()

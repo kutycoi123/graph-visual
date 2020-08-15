@@ -1,5 +1,8 @@
-.draggable{
-	
+.row {
+	margin-left: 15px;
+}
+.form-group{
+	margin-bottom: 0px;
 }
 .graph{
 	width: 100%;
@@ -22,11 +25,14 @@
 .edge{
 	fill: transparent;
 	stroke: white;
-	stroke-width: 2.5px ;
+	stroke-width: 3px ;
 }
 .arrow {
   fill: white;
 }
 .edge-weight{
 	fill: white;
+}
+.modal-body p {
+	margin: 0!important;
 }

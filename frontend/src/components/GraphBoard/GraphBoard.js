@@ -1,12 +1,29 @@
 import React, {useState, useRef, useEffect} from 'react';
-import {Mode, COLOR_MAPPING, CREATE_UNDIRECTIONAL_GRAPH} from '../constants.js';
+import {Mode, NODE_RADIUS, COLOR_MAPPING, CREATE_UNDIRECTIONAL_GRAPH} from '../constants.js';
 import axios from 'axios';
 import './GraphBoard.css';
 
 const URL = "http://localhost:5000";
+const calculateCurve = ( x1, y1, x2, y2 ) => {
+  let theta = Math.atan2(y2 - y1, x2 - x1) - Math.PI / 2;
+  let offset = 50;
+  let x = (x2 + x1) * 0.5 + offset * Math.cos(theta);
+  let y = (y2 + y1) * 0.5 + offset * Math.sin(theta);
+  return {x, y};
+};
+const calculateIntersection = (x1, y1, x2, y2) => {
+  let dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+  let ratio = (dist - NODE_RADIUS) / dist; 
+  let dx = (x2 - x1) * ratio;
+  let dy = (y2 - y1) * ratio;
+  let intersectX = x1 + dx;
+  let intersectY = y1 + dy;
+  return { x: intersectX, y: intersectY };
+};
 
 function GraphBoard(props) {
 	let random_graph = CREATE_UNDIRECTIONAL_GRAPH(5);
+
 	const [nodes, setNodes] = useState(random_graph.nodes);
 	const [edges, setEdges] = useState(random_graph.edges);
 	const [nodeCnt, setNodeCnt] = useState(nodes.length);
@@ -21,34 +38,9 @@ function GraphBoard(props) {
 	} = props;
 	const graph = useRef();
 	const clickedNode = useRef();
-	const calculateCurve = ( x1, y1, x2, y2 ) => {
-	  var mpx = (x2 + x1) * 0.5;
-	  var mpy = (y2 + y1) * 0.5;
 
-	  // angle of perpendicular to line:
-	  var theta = Math.atan2(y2 - y1, x2 - x1) - Math.PI / 2;
 
-	  // distance of control point from mid-point of line:
-	  var offset = 30;
-
-	  // location of control point:
-	  var c1x = mpx + offset * Math.cos(theta);
-	  var c1y = mpy + offset * Math.sin(theta);
-	  //let directedPath = `M${x1} ${y1} Q${c1x} ${c1y} ${x2} ${y2}`;
-	  //return directedPath;
-	  return {x: c1x, y: c1y};
-	};
-	const calculateAccurateCoords = (x1, y1, x2, y2) => {
-	  let dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-	  let ratio = (dist - Mode.NODE_RADIUS) / dist; 
-	  let dx = (x2 - x1) * ratio;
-	  let dy = (y2 - y1) * ratio;
-	  let intersectX = x1 + dx;
-	  let intersectY = y1 + dy;
-	  return { x: intersectX, y: intersectY };
-	};
-
-	const resetColor = () => {
+	const resetAlgo = () => {
 		let newNodes = nodes.map(e => {
 			return {...e, color: "white"};
 		});
@@ -59,6 +51,7 @@ function GraphBoard(props) {
 		setEdges(newEdges);
 		setColorReset(true);
 	}
+
 	const replaceNode = (id, newAttributes, nodes) => {
 		const idx = nodes.findIndex(e => e.id === id);
 		if (idx > -1) {
@@ -79,7 +72,7 @@ function GraphBoard(props) {
 	}
 	const isOverlapped = (x, y) => {
 		for (let node of nodes) {
-			if (Math.sqrt(Math.pow(x - node.x, 2) + Math.pow(y - node.y,2)) <= Mode.NODE_RADIUS) {
+			if (Math.sqrt(Math.pow(x - node.x, 2) + Math.pow(y - node.y,2)) <= NODE_RADIUS) {
 				return true;
 			}
 		}
@@ -165,7 +158,7 @@ function GraphBoard(props) {
 			const id = event.target.getAttribute('id').split(" ");
 			const fromId = parseInt(id[0])
 			const toId = parseInt(id[1]);
-			const newEdges = edges.filter(e => (e.from !== fromId || e.to !== toId) && (e.from !== toId || e.to !== fromId))
+			const newEdges = edges.filter(e => e.from !== fromId || e.to !== toId)
 			const fromNode = nodes.find(e => e.id === fromId);
 			const toNode = nodes.find(e => e.id === toId);
 			fromNode.neighbors = fromNode.neighbors.filter(id => id !== toId);
@@ -205,7 +198,7 @@ function GraphBoard(props) {
 		} else{
 			if ([Mode.DRAWNODE, Mode.DRAWEDGE, Mode.REMOVEEDGE, Mode.REMOVENODE].includes(mode)) {
 				graph.current.onclick = handleClick;
-			} else if (mode === Mode.RESET) {
+			} else if (mode === Mode.RESETGRAPH) {
 				graph.current.onclick = undefined;
 			}
 			graph.current.onmousedown = undefined;
@@ -214,7 +207,7 @@ function GraphBoard(props) {
 		}
 	}
 	useEffect(() => {
-		if (mode === Mode.RESET) {
+		if (mode === Mode.RESETGRAPH) {
 			setEdges([]);
 			setNodes([]);
 			setColorReset(true);
@@ -377,8 +370,8 @@ function GraphBoard(props) {
 				})
 			}
 			handleChangeMode(Mode.FINISH);
-		} else if (mode == Mode.RESETCOLOR) {
-			resetColor();
+		} else if (mode == Mode.RESETALGO) {
+			resetAlgo();
 		}
 	}, [mode])
 	return (
@@ -395,7 +388,7 @@ function GraphBoard(props) {
 				        style={{fill: e.color || "white"}}
 				        cx={e.x}
 				        cy={e.y}
-				        r={Mode.NODE_RADIUS}
+				        r={NODE_RADIUS}
 				        id={e.id}
 				      	>
 				      </circle>
@@ -408,8 +401,8 @@ function GraphBoard(props) {
 			{edges.map((e, idx) => {
 				const fromNode = nodes.find(node => node.id == e.from);
 				const toNode = nodes.find(node => node.id == e.to);
-				const intersectPoint1 = calculateAccurateCoords(fromNode.x, fromNode.y, toNode.x, toNode.y);
-				const intersectPoint2 = calculateAccurateCoords(toNode.x, toNode.y, fromNode.x, fromNode.y);
+				const intersectPoint1 = calculateIntersection(fromNode.x, fromNode.y, toNode.x, toNode.y);
+				const intersectPoint2 = calculateIntersection(toNode.x, toNode.y, fromNode.x, fromNode.y);
 				const midpoint = calculateCurve(intersectPoint2.x, intersectPoint2.y, intersectPoint1.x, intersectPoint1.y);
 				return (
 					<g>
@@ -434,13 +427,13 @@ function GraphBoard(props) {
 							if (mode == Mode.REMOVEEDGE) {
 								return;
 							}
-							let weight = parseInt(prompt(`Please set a weight for edge from node ${e.from} to node {e.to}`));
-							if (!Number.isNaN(weight) && weight >= 0) {
+							let weight = parseInt(prompt(`Please set a weight for edge from node ${e.from} to node ${e.to}`));
+							if (weight >= 0) {
 								let newEdges = [...edges];
 								let edge = newEdges.find(edge => e.id == edge.id);
 								edge.weight = weight;
 								setEdges(newEdges);
-							}else {
+							}else if(weight < 0) {
 								alert("Weight must be a number and non-negative")
 							}
 
@@ -457,7 +450,9 @@ function GraphBoard(props) {
 				)
 			})}
 
-		</svg>			
+		</svg>	
+
+	
 	);
 }
 
