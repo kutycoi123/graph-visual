@@ -53,7 +53,8 @@ function Main() {
 				</div>
 			</form>
 			<div className="row">
-				<button onClick={() => handleChangeMode(Mode.RUN)}>Run algorithm</button>
+				<button className={classnames({"btn_focus": mode==Mode.RUN})}
+					onClick={() => handleChangeMode(Mode.RUN)}>Run algorithm</button>
 				<button 
 					className={classnames({"btn_focus": mode==Mode.DRAWNODE})}
 					onClick={() => handleChangeMode(Mode.DRAWNODE)}

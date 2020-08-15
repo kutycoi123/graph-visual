@@ -214,7 +214,7 @@ function GraphBoard(props) {
 			setNodeCnt(0);
 		} else if (mode === Mode.RUN) {
 			if (!colorReset) {
-				alert("Please reset the color to visualize the algorithm");
+				alert(`Please reset the algorithm by clicking "Reset algorithm" button before running new one`);
 			}
 			else if (nodes.length == 0) {
 				alert("Please add some nodes in order to run algorithms");
@@ -243,12 +243,12 @@ function GraphBoard(props) {
 							//newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
 							setEdges(newEdges);
 							clearTimeout(colorEdge);
-						}, 500*i);
+						}, 900*i);
 						let colorNode = setTimeout(() => {
 							newNodes = replaceNode(node.id, {color: "red"}, newNodes);
 							setNodes(newNodes);
 							clearTimeout(colorNode);
-						}, 501*i)
+						}, 901*i)
 						i++;
 					}		
 					setColorReset(false);
@@ -282,7 +282,7 @@ function GraphBoard(props) {
 							newNodes = replaceNode(node.id, {color: node.color}, newNodes);
 							setNodes(newNodes);
 							clearTimeout(colorNodeHandler);
-						}, 500*i);
+						}, 900*i);
 						i++;
 					}
 					setColorReset(false);
@@ -306,7 +306,6 @@ function GraphBoard(props) {
 					let i = 1;
 					let newNodes = nodes;
 					let newEdges = edges;
-					console.log(trace)
 					for (let node of trace) {
 						if (node.status=="visited") {
 							let colorNode = setTimeout(() => {
@@ -363,7 +362,7 @@ function GraphBoard(props) {
 							//newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
 							setEdges(newEdges);
 							clearTimeout(colorEdge);
-						}, 700*i);
+						}, 900*i);
 						i++;
 					}						
 					setColorReset(false);	
