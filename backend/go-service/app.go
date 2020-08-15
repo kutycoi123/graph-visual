@@ -2,6 +2,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	zmq "github.com/pebbe/zmq4"
 )
 type Node struct {
@@ -299,6 +300,76 @@ func (graph Graph) dijkstra() []Node{
 	return trace
 
 }
+
+type MSTNode struct {
+	id int32
+	rank int64
+	parent *MSTNode
+}
+func NewMSTNode(id int32, rank int64) MSTNode {
+	node := MSTNode{}
+	node.id = id
+	node.rank = rank
+	node.parent = &node
+	return node
+}
+func (n *MSTNode) find() *MSTNode{
+	if n.parent != n {
+		n.parent = n.parent.find()
+	}
+	return n.parent
+}
+func (x *MSTNode) union(y *MSTNode) {
+	xRoot := x.find()
+	yRoot := y.find()
+	if xRoot != yRoot {
+		if xRoot.rank < yRoot.rank {
+			xRoot, yRoot = yRoot, xRoot
+		}
+		yRoot.parent = xRoot
+		if xRoot.rank == yRoot.rank {
+			xRoot.rank = xRoot.rank + 1
+		}
+	}
+}
+func (g Graph) Mst() []Edge {
+	edges := make([]Edge, 0)
+	sort.SliceStable(g.Edges, func(i, j int) bool {
+		return g.Edges[i].Weight < g.Edges[j].Weight
+	})
+	for i:=0;i<len(g.Edges);i++{
+		check := true
+		for j:=0;j<i;j++{
+			if g.Edges[j].To == g.Edges[i].From && g.Edges[j].From == g.Edges[i].To {
+				check = false
+				break
+			}
+		}
+		if check {
+			edges = append(edges, g.Edges[i])
+		}
+	}
+	nodes := make(map[int32]MSTNode)
+	for _,node := range g.Nodes {
+		nodes[node.Id] = NewMSTNode(node.Id, 1)
+	}
+	l := len(g.Nodes) - 1
+	mst := make([]Edge, l)
+	i := 0
+	for i < l && len(edges) > 0{
+		minEdge := edges[0]
+		edges = edges[1:]
+		fromNode := nodes[minEdge.From]
+		toNode := nodes[minEdge.To]
+		if fromNode.parent != toNode.parent {
+			mst[i] = minEdge
+			i++
+			fromNode.union(&toNode)
+		}
+	}
+	return mst
+
+}
 func main() {
 	replier, _ := zmq.NewSocket(zmq.REP)
 	defer replier.Close()
@@ -335,6 +406,11 @@ func main() {
 		} else if message.Algo == "dijkstra" {
 			trace := message.Graph.dijkstra()
 			response, _ := json.Marshal(trace)
+			replier.SendBytes(response, 0)
+			fmt.Printf("Finish sending response")
+		} else if message.Algo == "mst" {
+			mst := message.Graph.Mst()
+			response, _ := json.Marshal(mst)
 			replier.SendBytes(response, 0)
 			fmt.Printf("Finish sending response")
 		}

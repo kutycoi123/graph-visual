@@ -123,7 +123,19 @@ def dijkstra_go():
     res = socket.recv()
     response = json.loads(res.decode('utf-8'))
     return jsonify(response)  
-
+    
+@app.route('/api/go/mst', methods=['POST'])
+def mst_go():
+    data = request.json
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5555")
+    reqData = {"graph":data, "algo":"mst"}
+    req = json.dumps(reqData).encode('utf8')
+    socket.send(req)
+    res = socket.recv()
+    response = json.loads(res.decode('utf-8'))
+    return jsonify(response)  
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0',port=5000)
 

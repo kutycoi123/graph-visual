@@ -222,7 +222,6 @@ class MST(GraphAlgorithm):
                     break
             if check:
                 self.edges.append(sortedEdges[i])
-        print(self.edges)
     def mst(self):
         def find(x):
             if x.parent != x:
