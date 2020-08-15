@@ -172,29 +172,29 @@ execute 'pip3 install -r requirements.txt' do
   cwd python_service  
 end  
 
-execute 'npm run build' do
-  cwd frontend
-  user username
-  environment 'HOME' => user_home
-end
+# execute 'npm run build' do
+#   cwd frontend
+#   user username
+#   environment 'HOME' => user_home
+# end
 
-execute 'nohup node server.js &' do
-  cwd frontend
-  user username
-  environment 'HOME' => user_home
-end
+# execute 'nohup node server.js &' do
+#   cwd frontend
+#   user username
+#   environment 'HOME' => user_home
+# end
 
-execute 'screen -dm python3 app.py &' do
-  cwd python_service
-  user username
-  environment 'HOME' => user_home
-end
+# execute 'screen -dm python3 app.py &' do
+#   cwd python_service
+#   user username
+#   environment 'HOME' => user_home
+# end
 
-execute 'screen -dm go run app.go &' do
-  cwd go_service
-  user username
-  environment 'HOME' => user_home
-end
+# execute 'screen -dm go run app.go &' do
+#   cwd go_service
+#   user username
+#   environment 'HOME' => user_home
+# end
 
 # GraalVM
 

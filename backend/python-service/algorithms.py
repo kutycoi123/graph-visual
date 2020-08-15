@@ -242,7 +242,8 @@ class MST(GraphAlgorithm):
         for node in nodes:
             node.parent = node
         sol = []
-        while len(sol) < len(self.nodes) - 1 and self.edges:
+        i = 0
+        while i < len(self.nodes) - 1 and self.edges:
             minEdge = self.edges.pop(0)
             fromNode = None
             toNode = None
@@ -254,8 +255,13 @@ class MST(GraphAlgorithm):
             fromNodeRoot = find(fromNode)
             toNodeRoot = find(toNode)
             if fromNodeRoot != toNodeRoot:
+                minEdge["selected"] = True
                 sol.append(minEdge)
+                i+=1
                 union(fromNode, toNode)
+            else:
+                minEdge["selected"] = False
+                sol.append(minEdge)
         return sol
     def run(self):
         return self.mst()

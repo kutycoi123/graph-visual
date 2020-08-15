@@ -15,7 +15,8 @@ type Node struct {
 type Edge struct {
 	From int32 `json:"from"`
 	To int32 `json:"to"`
-	Weight int64
+	Weight int64 `json:"weight"`
+	Selected bool `json:"selected"`
 }
 
 type Graph struct {
@@ -34,7 +35,7 @@ func (n Node) String() string {
 }
 
 func (n Graph) String() string {
-	return fmt.Sprintf("{nodes:%v startNode:%v}", n.Nodes, n.StartNode)
+	return fmt.Sprintf("{nodes:%v startNode:%v edges: %v}", n.Nodes, n.StartNode, n.Edges)
 }
 
 func (n Request) String() string {
@@ -364,7 +365,7 @@ func (g Graph) Mst() []Edge {
 		nodes[node.Id] = NewMSTNode(node.Id, 1)
 	}
 	l := len(g.Nodes) - 1
-	mst := make([]Edge, l)
+	mst := make([]Edge, 0)
 	i := 0
 	for i < l && len(edges) > 0{
 		minEdge := edges[0]
@@ -374,9 +375,13 @@ func (g Graph) Mst() []Edge {
 		fromNodeRoot := fromNode.find()
 		toNodeRoot := toNode.find()
 		if fromNodeRoot != toNodeRoot {
-			mst[i] = minEdge
+			minEdge.Selected = true			
+			mst = append(mst, minEdge)
 			i++
 			fromNode.union(&toNode)
+		}else {
+			minEdge.Selected = false
+			mst = append(mst, minEdge)
 		}
 	}
 	return mst

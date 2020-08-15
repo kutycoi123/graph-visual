@@ -331,7 +331,7 @@ function GraphBoard(props) {
 									setEdges(newEdges);
 									clearTimeout(colorEdge2);
 								}, 1000);
-							}, 1001*i);	
+							}, 1000*i);	
 							
 						}
 						i++;
@@ -357,12 +357,29 @@ function GraphBoard(props) {
 					let newEdges = [...edges];
 					let i = 0;
 					for (let edge of mst) {
-						let colorEdge = setTimeout(() => {
-							newEdges = replaceEdge(edge.from, edge.to, {color: "green"}, newEdges);
+						let colorEdge1 = setTimeout(() => {
+							newEdges = replaceEdge(edge.from, edge.to, {color: "red"}, newEdges);
 							//newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
 							setEdges(newEdges);
-							clearTimeout(colorEdge);
-						}, 900*i);
+							clearTimeout(colorEdge1);
+							if (edge["selected"]){
+								let colorEdge2 = setTimeout(() => {
+									newEdges = replaceEdge(edge.from, edge.to, {color: "green"}, newEdges);
+									//newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
+									setEdges(newEdges);
+									clearTimeout(colorEdge2);
+								}, 1000);							
+							}else{
+								let colorEdge2 = setTimeout(() => {
+									newEdges = replaceEdge(edge.from, edge.to, {color: "white"}, newEdges);
+									//newEdges = replaceEdge(node.id, node.parent, {color: "green"}, newEdges);
+									setEdges(newEdges);
+									clearTimeout(colorEdge2);
+								}, 1000);								
+							}
+						}, 1000*i);
+
+
 						i++;
 					}						
 					setColorReset(false);	
