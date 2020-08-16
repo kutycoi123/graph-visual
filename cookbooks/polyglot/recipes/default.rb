@@ -162,6 +162,13 @@ execute 'go get github.com/pebbe/zmq4' do
  creates user_home + '/go/pkg/linux_amd64/github.com/pebbe/zmq4.a'
 end
 
+execute 'npm cache clean -f' do
+  cwd frontend
+end
+execute 'npm update' do
+  cwd frontend
+end
+
 # Install frontend packages
 execute 'npm install' do 
   cwd frontend
@@ -171,6 +178,7 @@ end
 execute 'pip3 install -r requirements.txt' do
   cwd python_service  
 end  
+
 
 execute 'npm run build' do
   cwd frontend
