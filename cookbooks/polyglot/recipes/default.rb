@@ -97,7 +97,7 @@ package 'golang-go'  # Go
 # NodeJS (more modern than Ubuntu nodejs package) and NPM
 
 remote_file '/opt/installers/node-setup.sh' do
- source 'https://deb.nodesource.com/setup_14.x'
+ source 'https://deb.nodesource.com/setup_12.x'
  mode '0755'
 end
 execute '/opt/installers/node-setup.sh' do
@@ -162,15 +162,8 @@ execute 'go get github.com/pebbe/zmq4' do
  creates user_home + '/go/pkg/linux_amd64/github.com/pebbe/zmq4.a'
 end
 
-execute 'npm cache clean -f' do
-  cwd frontend
-end
-execute 'npm update' do
-  cwd frontend
-end
-
 # Install frontend packages
-execute 'npm install' do 
+execute 'npm install --no-bin-links' do 
   cwd frontend
 end  
 
