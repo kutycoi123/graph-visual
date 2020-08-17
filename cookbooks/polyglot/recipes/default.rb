@@ -173,11 +173,11 @@ execute 'pip3 install -r requirements.txt' do
 end  
 
 
-execute 'npm run build' do
-  cwd frontend
-  user username
-  environment 'HOME' => user_home
-end
+# execute 'npm run build' do
+#   cwd frontend
+#   user username
+#   environment 'HOME' => user_home
+# end
 
 execute 'nohup node server.js &' do
   cwd frontend
